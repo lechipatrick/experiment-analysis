@@ -1,0 +1,10 @@
+version: '3.5'
+services:
+    unit-tests:
+        container_name: unit-tests
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            - ./:/app
+        command: ["pytest"]
