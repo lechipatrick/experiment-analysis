@@ -35,6 +35,19 @@ class RandomizationInference:
         treatment: NDArray[np.float64],
         num_randomizations: int = 10000,
     ) -> None:
+        """
+        Initialize the instance with data.
+
+        Parameters
+        ----------
+        control : numpy.array
+            observed metric values for control units
+        treatment: numpy.array
+            observed metric values for treatment units
+        num_randomizations : int
+            number of randomizations to use to construct empirical distribution of estimates (under the null)
+        """
+
         self._control = control
         self._treatment = treatment
         self._num_randomizations = num_randomizations
@@ -56,7 +69,7 @@ class RandomizationInference:
     def num_randomizations(self) -> int:
         return self._num_randomizations
 
-    def get_p_value(self) -> np.float64:
+    def get_p_value(self) -> float:
         """
         Compute the p-value for the test against the null hypothesis that the treatment effect is zero.
 
@@ -74,7 +87,7 @@ class RandomizationInference:
             np.abs(random_treatment_effects)
             > np.abs(observed_treatment_effect)
         ).mean()
-        return p_value
+        return p_value  # type: ignore
 
     def get_treatment_effect(self) -> np.float64:
         return np.mean(self.treatment) - np.mean(self.control)
@@ -96,7 +109,7 @@ class RandomizationInference:
 
     def _get_random_treatment_effects(self) -> NDArray[np.float64]:
         random_treatment_effects = []
-        for i in range(self.num_randomizations):
+        for _ in range(self.num_randomizations):
             random_control, random_treatment = self._shuffle()
             treatment_effect = self._get_random_treatment_effect(
                 random_control, random_treatment
