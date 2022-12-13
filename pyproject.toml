@@ -35,10 +35,7 @@ fail_under = 100
 show_missing = true
 
 [tool.darglint]
-# Just a doc placeholder see setup.cfg
-# ignore private methods
 ignore_regex = "^_(.*)"
-# one liners are ok, longer pls doc everything
 strictness = "short"
 
 [tool.isort]
@@ -47,37 +44,25 @@ multi_line_output = 3
 profile = "black"
 
 [tool.flake8]
-# This section is just a doc placeholder..see setup.cfg
-#   https://gitlab.com/pycqa/flake8/-/issues/428#note_251982786
 format = "pylint"
 max-complexity = 10
 max-line-length = 79
 statistics = "True"
-# ignore non-PEP8 lints
 ignore = ["E203", "W503"]
 
 [tool.pytest.ini_options]
 junit_family = "xunit2"
 
 [tool.mypy]
-# source: https://github.com/psf/black/blob/master/mypy.ini
-#  with modifications
-# Specify the target platform details in config, so your developers are
-# free to run mypy on Windows, Linux, or macOS and get consistent
-# results.
 platform = "linux"
 python_version = 3.9
 
-# flake8-mypy expects the two following for sensible formatting
 show_column_numbers = "True"
 
-# show error messages from unrelated files
 follow_imports = "normal"
 
-# suppress errors about unsatisfied imports
 ignore_missing_imports = "True"
 
-# be strict
 disallow_any_generics = "True"
 disallow_untyped_calls = "True"
 strict_optional = "True"
@@ -86,12 +71,9 @@ warn_redundant_casts = "True"
 warn_return_any = "True"
 warn_unused_ignores = "True"
 
-# The following are off by default.  Flip them on if you feel
-# adventurous.
 check_untyped_defs = "True"
 disallow_untyped_defs = "True"
 
-# No incremental mode
 cache_dir = "/dev/null"
 
 [[tool.mypy.overrides]]

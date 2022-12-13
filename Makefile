@@ -12,15 +12,15 @@ setup.ci.poetry:
 	pip install --user poetry
 setup.project:
 	@poetry env use $$(python -c "import sys; print(sys.executable)")
-	@echo "Active interpreter path: $$(poetry env info --path)/bin/python"
+	@echo "interpreter path: $$(poetry env info --path)/bin/python"
 	poetry install
 setup.python.activation:
 	@asdf local python ${PYTHON_VERSION} >/dev/null 2>&1 /dev/null || true
 setup.python: setup.python.activation
-	@echo "Active Python version: $$(python --version)"
-	@echo "Base Interpreter path: $$(python -c 'import sys; print(sys.executable)')"
+	@echo "current python version: $$(python --version)"
+	@echo "interpreter path: $$(python -c 'import sys; print(sys.executable)')"
 	@test "$$(python --version | cut -d' ' -f2)" = "${PYTHON_VERSION}" \
-        || (echo "Please activate python ${PYTHON_VERSION}" && exit 1)
+        || (echo "need to activate python ${PYTHON_VERSION}" && exit 1)
 setup.sysdeps:
 	asdf plugin update --all
 	@for p in $$(cut -d" " -f1 .tool-versions | sort | tr '\n' ' '); do \
