@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import chisquare
 
-from experiment_analysis.ab.randomization_inference import (
+from experiment_analysis.ab.additive_metric.randomization_inference import (
     RandomizationInference,
 )
 
