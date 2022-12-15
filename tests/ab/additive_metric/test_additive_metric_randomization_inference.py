@@ -27,17 +27,11 @@ class TestRandomizationInference:
                 data=test_data, num_draws=-100
             )
 
-        with pytest.raises(ValueError, match="data must contain column"):
+        with pytest.raises(ValueError, match="data must contain columns"):
             _ = AdditiveMetricRandomizationInference(
                 data=test_data[[METRIC]], num_draws=100
             )
 
-        with pytest.raises(ValueError, match="data must contain column"):
-            _ = AdditiveMetricRandomizationInference(
-                data=test_data[[VARIATION]], num_draws=100
-            )
-
-    def test_invalid_variation(self, test_data: Any) -> None:
         invalid_test_data = test_data
         invalid_test_data[VARIATION] = "invalid_variation"
         with pytest.raises(ValueError, match="variation must take values"):

@@ -1,38 +1,68 @@
-import pandas as pd
-
-from experiment_analysis.base.base_randomization_inference import (
-    BaseRandomizationInference,
-)
-from experiment_analysis.base.base_additive_metric import BaseAdditiveMetric
-from experiment_analysis.constants import CONTROL, METRIC, TREATMENT, VARIATION
-
-
-class AdditiveMetricRandomizationInference(BaseRandomizationInference, BaseAdditiveMetric):
-    def __init__(self, *, data: pd.DataFrame, num_draws: int) -> None:
-        super().__init__(data=data, num_draws=num_draws)
-        self._validate_data_columns()
-
-    def _validate_data_columns(self) -> None:
-        if not set({METRIC, VARIATION}).issubset(set(self.data.columns)):
-            raise ValueError(
-                f"data must contain columns {METRIC} and {VARIATION}"
-            )
-
 import numpy as np
-num_units = 1000
+import pandas as pd
+from numpy.typing import NDArray
 
-variation_control = [CONTROL for _ in range(num_units)]
-variation_treatment = [TREATMENT for _ in range(num_units)]
+from experiment_analysis.base.base import (
+    estimate_treatment_effect_additive_metric,
+    get_control_proportion,
+    get_p_value_randomized_inference,
+    randomize_assignment,
+    validate_data_columns,
+    validate_data_type,
+    validate_num_draws,
+    validate_variation,
+)
+from experiment_analysis.constants import METRIC, VARIATION
 
-metric_control = np.random.normal(loc=0, scale=1, size=(num_units,))
-metric_treatment = np.random.normal(loc=1, scale=1, size=(num_units,))
 
-data = {
-    METRIC: np.hstack((metric_control, metric_treatment)),
-    VARIATION: variation_control + variation_treatment,
-}
-df = pd.DataFrame.from_dict(data)
+class AdditiveMetricRandomizationInference:
+    def __init__(self, *, data: pd.DataFrame, num_draws: int = 10000) -> None:
+        self.data = data
+        self.num_draws = num_draws
+        self._control_proportion = None
+        self._treatment_effect = None
 
-rand_inf = AdditiveMetricRandomizationInference(data=df, num_draws=100)
+        self._validate()
 
-rand_inf.treatment_effect
+    def _validate(self) -> None:
+        validate_data_type(self.data)
+        validate_data_columns(self.data, columns=[METRIC, VARIATION])
+        validate_num_draws(self.num_draws)
+        validate_variation(self.data)
+
+    @property
+    def treatment_effect(self) -> float:
+        if not self._treatment_effect:
+            self._treatment_effect = estimate_treatment_effect_additive_metric(
+                self.data
+            )
+        return self._treatment_effect  # type: ignore
+
+    @property
+    def control_proportion(self) -> float:
+        if not self._control_proportion:
+            self._control_proportion = get_control_proportion(self.data)
+        return self._control_proportion  # type: ignore
+
+    def draw_treatment_effects(self) -> NDArray[np.float64]:
+        drawn_treatment_effects = np.zeros((self.num_draws,))
+
+        for i in range(self.num_draws):
+            drawn_data = randomize_assignment(
+                self.data, self.control_proportion
+            )
+            treatment_effect = estimate_treatment_effect_additive_metric(
+                drawn_data
+            )
+            drawn_treatment_effects[i] = treatment_effect
+
+        return drawn_treatment_effects
+
+    def get_p_value(self) -> float:
+        drawn_treatment_effects = self.draw_treatment_effects()
+        observe_treatment_effect = estimate_treatment_effect_additive_metric(
+            self.data
+        )
+        return get_p_value_randomized_inference(
+            observe_treatment_effect, drawn_treatment_effects
+        )
