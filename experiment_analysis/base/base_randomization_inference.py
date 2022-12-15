@@ -11,6 +11,7 @@ class BaseRandomizationInference:
     """
     An abstract class that outlines the steps that any randomization inference method should follow.
     This class expects the data for analysis to be a pandas DataFrame, with certain required columns.
+    The specific requirements would differ for different child classes.
     """
 
     def __init__(self, *, data: pd.DataFrame, num_randomizations: int) -> None:

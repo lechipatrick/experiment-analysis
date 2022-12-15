@@ -18,12 +18,14 @@ class TestRandomizationInference:
         # generate the p-values
         num_sims = 1000
         pvalues = np.zeros((num_sims,))
+
+        _rv = np.random.normal(0, 1, size=(2000,))
+        variation = np.where(_rv > 0.5, "treatment", "control")
+
         for i in range(num_sims):
             if i % 10 == 0:
                 print(f"at iteration {i}")
             metric = np.random.normal(0, 1, size=(2000,))
-            _rv = np.random.normal(0, 1, size=(2000,))
-            variation = np.where(_rv > 0.5, "treatment", "control")
             data = {"metric": metric, "variation": variation}
             df = pd.DataFrame.from_dict(data)
             rand_inf = AdditiveMetricRandomizationInference(

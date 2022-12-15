@@ -52,3 +52,9 @@ lints.pylint:
 test:
 	pytest tests/ -v --capture=tee-sys
 
+test.fast:
+	pytest tests/ -v -m "not slow" --capture=tee-sys
+
+test.slow:
+	pytest tests/ -v -m "slow" --capture=tee-sys
+
