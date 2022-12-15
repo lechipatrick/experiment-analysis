@@ -1,7 +1,8 @@
 from typing import List
-from numpy.typing import NDArray
+
 import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
 
 from experiment_analysis.constants import CONTROL, METRIC, TREATMENT, VARIATION
 
@@ -40,7 +41,8 @@ def bootstrap(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_p_value_randomized_inference(
-    observed_treatment_effect: float, drawn_treatment_effects: NDArray[np.float64]
+    observed_treatment_effect: float,
+    drawn_treatment_effects: NDArray[np.float64],
 ) -> float:
     p_value = (
         np.abs(drawn_treatment_effects) > np.abs(observed_treatment_effect)
