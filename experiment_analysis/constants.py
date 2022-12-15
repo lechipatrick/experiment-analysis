@@ -1,1 +1,4 @@
-NORMAL_ALPHA_005 = 1.96
+CONTROL = "control"
+TREATMENT = "treatment"
+VARIATION = "variation"
+METRIC = "metric"
