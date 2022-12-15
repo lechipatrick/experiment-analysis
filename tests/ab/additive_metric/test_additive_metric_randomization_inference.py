@@ -1,4 +1,5 @@
 from typing import Any
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -16,39 +17,41 @@ class TestRandomizationInference:
             ValueError, match="data must be a pandas DataFrame"
         ):
             _ = AdditiveMetricRandomizationInference(
-                data="invalid", num_randomizations=100
+                data="invalid", num_draws=100
             )
 
         with pytest.raises(
-            ValueError, match="num_randomizations must be a positive integer"
+            ValueError, match="num_draws must be a positive integer"
         ):
             _ = AdditiveMetricRandomizationInference(
-                data=test_data, num_randomizations=-100
+                data=test_data, num_draws=-100
             )
 
-        with pytest.raises(ValueError, match="data must contain column"):
+        with pytest.raises(ValueError, match="data must contain columns"):
             _ = AdditiveMetricRandomizationInference(
-                data=test_data[[METRIC]], num_randomizations=100
+                data=test_data[[METRIC]], num_draws=100
             )
 
-        with pytest.raises(ValueError, match="data must contain column"):
-            _ = AdditiveMetricRandomizationInference(
-                data=test_data[[VARIATION]], num_randomizations=100
-            )
-
-    def test_invalid_variation(self, test_data: Any) -> None:
         invalid_test_data = test_data
         invalid_test_data[VARIATION] = "invalid_variation"
         with pytest.raises(ValueError, match="variation must take values"):
             _ = AdditiveMetricRandomizationInference(
-                data=invalid_test_data, num_randomizations=100
+                data=invalid_test_data, num_draws=100
             )
 
     def test_treatment_effect(self, test_data: Any) -> None:
         rand_inf = AdditiveMetricRandomizationInference(
-            data=test_data, num_randomizations=1000
+            data=test_data, num_draws=1000
         )
-        assert rand_inf.treatment_effect == 1.0
+        assert rand_inf.treatment_effect > 0.5
+
+    def test_draw_treatment_effects(self, test_data: Any) -> None:
+        # drawn treatment effects should center around zero even if the true treatment effect is non-zero.
+        rand_inf = AdditiveMetricRandomizationInference(
+            data=test_data, num_draws=10000
+        )
+        drawn_treatment_effects = rand_inf.draw_treatment_effects()
+        assert -0.01 < drawn_treatment_effects.mean() < 0.01
 
     @pytest.mark.slow
     def test_p_value(self) -> None:
@@ -57,7 +60,7 @@ class TestRandomizationInference:
         threshold to reject the null, then the fraction of such rejections should be around 5 percent
         """
         # generate the p-values
-        num_sims = 10  # 00
+        num_sims = 1000
         pvalues = np.zeros((num_sims,))
 
         _rv = np.random.normal(0, 1, size=(2000,))
@@ -70,7 +73,7 @@ class TestRandomizationInference:
             data = {METRIC: metric, VARIATION: variation}
             df = pd.DataFrame.from_dict(data)
             rand_inf = AdditiveMetricRandomizationInference(
-                data=df, num_randomizations=1000
+                data=df, num_draws=1000
             )
             p_value = rand_inf.get_p_value()
             pvalues[i] = p_value
