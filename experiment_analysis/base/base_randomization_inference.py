@@ -20,16 +20,16 @@ class BaseRandomizationInference:
         self._control_proportion = None
         self._treatment_effect = None
         self._data_size = None
+
+        self._validate()
+
         self._randomized_assignment_data = data.copy()
 
-        self._validate_data_types()
-        self._validate_variation()
-
     def _validate(self) -> None:
-        self._validate_data_types()
+        self._validate_data_inputs()
         self._validate_variation()
 
-    def _validate_data_types(self) -> None:
+    def _validate_data_inputs(self) -> None:
         if not isinstance(self.data, pd.DataFrame):
             raise ValueError("data must be a pandas DataFrame")
         if (

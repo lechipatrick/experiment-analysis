@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 import pandas as pd
 import pytest
@@ -6,9 +7,49 @@ from scipy.stats import chisquare
 from experiment_analysis.ab.additive_metric.additive_metric_randomization_inference import (
     AdditiveMetricRandomizationInference,
 )
+from experiment_analysis.constants import METRIC, VARIATION
 
 
 class TestRandomizationInference:
+    def test_invalid_data_inputs(self, test_data: Any) -> None:
+        with pytest.raises(
+            ValueError, match="data must be a pandas DataFrame"
+        ):
+            _ = AdditiveMetricRandomizationInference(
+                data="invalid", num_randomizations=100
+            )
+
+        with pytest.raises(
+            ValueError, match="num_randomizations must be a positive integer"
+        ):
+            _ = AdditiveMetricRandomizationInference(
+                data=test_data, num_randomizations=-100
+            )
+
+        with pytest.raises(ValueError, match="data must contain column"):
+            _ = AdditiveMetricRandomizationInference(
+                data=test_data[[METRIC]], num_randomizations=100
+            )
+
+        with pytest.raises(ValueError, match="data must contain column"):
+            _ = AdditiveMetricRandomizationInference(
+                data=test_data[[VARIATION]], num_randomizations=100
+            )
+
+    def test_invalid_variation(self, test_data: Any) -> None:
+        invalid_test_data = test_data
+        invalid_test_data[VARIATION] = "invalid_variation"
+        with pytest.raises(ValueError, match="variation must take values"):
+            _ = AdditiveMetricRandomizationInference(
+                data=invalid_test_data, num_randomizations=100
+            )
+
+    def test_treatment_effect(self, test_data: Any) -> None:
+        rand_inf = AdditiveMetricRandomizationInference(
+            data=test_data, num_randomizations=1000
+        )
+        assert rand_inf.treatment_effect == 1.0
+
     @pytest.mark.slow
     def test_p_value(self) -> None:
         """
@@ -16,7 +57,7 @@ class TestRandomizationInference:
         threshold to reject the null, then the fraction of such rejections should be around 5 percent
         """
         # generate the p-values
-        num_sims = 1000
+        num_sims = 10  # 00
         pvalues = np.zeros((num_sims,))
 
         _rv = np.random.normal(0, 1, size=(2000,))
@@ -26,7 +67,7 @@ class TestRandomizationInference:
             if i % 10 == 0:
                 print(f"at iteration {i}")
             metric = np.random.normal(0, 1, size=(2000,))
-            data = {"metric": metric, "variation": variation}
+            data = {METRIC: metric, VARIATION: variation}
             df = pd.DataFrame.from_dict(data)
             rand_inf = AdditiveMetricRandomizationInference(
                 data=df, num_randomizations=1000

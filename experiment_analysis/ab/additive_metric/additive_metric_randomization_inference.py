@@ -7,6 +7,10 @@ from experiment_analysis.constants import CONTROL, METRIC, TREATMENT, VARIATION
 
 
 class AdditiveMetricRandomizationInference(BaseRandomizationInference):
+    def __init__(self, *, data: pd.DataFrame, num_randomizations: int) -> None:
+        super().__init__(data=data, num_randomizations=num_randomizations)
+        self._validate_data_columns()
+
     def _validate_data_columns(self) -> None:
         if not set({METRIC, VARIATION}).issubset(set(self.data.columns)):
             raise ValueError(
