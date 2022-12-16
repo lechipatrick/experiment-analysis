@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from experiment_analysis.constants import (
@@ -7,12 +8,14 @@ from experiment_analysis.constants import (
     RANDOMIZATION,
     TREATMENT,
     VARIATION,
+    ZTEST,
 )
 from experiment_analysis.data_models.additive_metric_data import (
     AdditiveMetricData,
 )
 from experiment_analysis.stats.bootstrap import Bootstrap
 from experiment_analysis.stats.randomization import Randomization
+from experiment_analysis.stats.ztest import ZTest
 
 
 class AdditiveMetricInference:
@@ -42,11 +45,15 @@ class AdditiveMetricInference:
             self._treatment_effect = self.estimate_treatment_effect(self.data)  # type: ignore
         return self._treatment_effect  # type: ignore
 
-    def get_p_value(self, method: str = RANDOMIZATION, *args, **kwargs) -> float:
+    def get_p_value(
+        self, method: str = RANDOMIZATION, *args, **kwargs
+    ) -> float:
         if method == RANDOMIZATION:
             return self._get_p_value_randomization(*args, **kwargs)
         elif method == BOOTSTRAP:
             return self._get_p_value_bootstrap(*args, **kwargs)
+        elif method == ZTEST:
+            return self._get_p_value_z_test(*args, **kwargs)
         else:
             raise NotImplementedError
 
@@ -72,3 +79,14 @@ class AdditiveMetricInference:
         return Randomization.get_p_value(
             self.treatment_effect, randomized_estimates
         )
+
+    def _get_p_value_z_test(self) -> float:
+        # relies on CLT, assuming no outliers
+        data = self.data
+        control = np.array(data[data[VARIATION] == CONTROL][METRIC])
+        treatment = np.array(data[data[VARIATION] == TREATMENT][METRIC])
+
+        std = np.sqrt(
+            control.var() / len(control) + treatment.var() / len(treatment)
+        )
+        return ZTest.get_p_value(self.treatment_effect, std)

@@ -50,9 +50,9 @@ lints.pylint:
 	poetry run pylint --rcfile pyproject.toml ${SOURCE_OBJECTS}
 
 test:
-	pytest tests/ -v --capture=tee-sys
+	pytest tests/ -v --capture=tee-sys -n auto
 test.fast:
-	pytest tests/ -v -m "not slow" --capture=tee-sys
+	pytest tests/ -v -m "not slow" --capture=tee-sys -n auto
 test.slow:
-	pytest tests/ -v -m "slow" --capture=tee-sys
+	pytest tests/ -v -m "slow" --capture=tee-sys -n auto
 
