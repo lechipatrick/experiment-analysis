@@ -8,7 +8,7 @@ from experiment_analysis.constants import (
     RANDOMIZATION,
     TREATMENT,
     VARIATION,
-    ZTEST
+    ZTEST,
 )
 from experiment_analysis.data_models.additive_metric_data import (
     AdditiveMetricData,
@@ -45,7 +45,9 @@ class AdditiveMetricInference:
             self._treatment_effect = self.estimate_treatment_effect(self.data)  # type: ignore
         return self._treatment_effect  # type: ignore
 
-    def get_p_value(self, method: str = RANDOMIZATION, *args, **kwargs) -> float:
+    def get_p_value(
+        self, method: str = RANDOMIZATION, *args, **kwargs
+    ) -> float:
         if method == RANDOMIZATION:
             return self._get_p_value_randomization(*args, **kwargs)
         elif method == BOOTSTRAP:
@@ -84,6 +86,7 @@ class AdditiveMetricInference:
         control = np.array(data[data[VARIATION] == CONTROL][METRIC])
         treatment = np.array(data[data[VARIATION] == TREATMENT][METRIC])
 
-        std = np.sqrt(control.var() / len(control) + treatment.var() / len(treatment))
+        std = np.sqrt(
+            control.var() / len(control) + treatment.var() / len(treatment)
+        )
         return ZTest.get_p_value(self.treatment_effect, std)
-

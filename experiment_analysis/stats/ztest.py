@@ -3,7 +3,6 @@ from scipy import stats
 
 
 class ZTest:
-
     @classmethod
     def get_z_statistic(cls, estimate: float, std: float) -> float:
         return estimate / std
