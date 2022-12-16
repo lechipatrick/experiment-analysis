@@ -34,7 +34,7 @@ class TestRandomizationInference:
         threshold to reject the null, then the fraction of such rejections should be around 5 percent
         """
         # generate the p-values
-        num_sims = 100
+        num_sims = 1000
         pvalues = np.zeros((num_sims,))
 
         _rv = np.random.normal(0, 1, size=(2000,))
