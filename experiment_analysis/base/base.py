@@ -1,18 +1,11 @@
-from scipy import stats
 from typing import List
 
 import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
+from scipy import stats
 
 from experiment_analysis.constants import CONTROL, METRIC, TREATMENT, VARIATION
-
-
-def estimate_treatment_effect_additive_metric(data: pd.DataFrame) -> float:
-    control_mean = data[data[VARIATION] == CONTROL][METRIC].mean()
-    treatment_mean = data[data[VARIATION] == TREATMENT][METRIC].mean()
-
-    return treatment_mean - control_mean  # type: ignore
 
 
 def get_control_proportion(data: pd.DataFrame) -> float:
@@ -49,6 +42,7 @@ def get_p_value_bootstrap(
     z_statistic = observed_treatment_effect / se
     p_value = 2 * stats.norm.sf(z_statistic, loc=0, scale=1)
     return p_value
+
 
 def get_p_value_randomized_inference(
     observed_treatment_effect: float,
