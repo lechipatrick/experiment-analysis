@@ -3,18 +3,16 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from experiment_analysis.base.base import (
+    bootstrap,
     estimate_treatment_effect_additive_metric,
-    get_control_proportion,
-    get_p_value_randomized_inference,
-    randomize_assignment,
+    get_p_value_bootstrap,
 )
 
 
-class AdditiveMetricRandomizationInference:
+class AdditiveMetricBootstrapInference:
     def __init__(self, *, data: pd.DataFrame, num_draws: int = 10000) -> None:
         self.data = data
         self.num_draws = num_draws
-        self._control_proportion = None
         self._treatment_effect = None
 
     @property
@@ -25,19 +23,11 @@ class AdditiveMetricRandomizationInference:
             )
         return self._treatment_effect  # type: ignore
 
-    @property
-    def control_proportion(self) -> float:
-        if not self._control_proportion:
-            self._control_proportion = get_control_proportion(self.data)
-        return self._control_proportion  # type: ignore
-
     def draw_treatment_effects(self) -> NDArray[np.float64]:
         drawn_treatment_effects = np.zeros((self.num_draws,))
 
         for i in range(self.num_draws):
-            drawn_data = randomize_assignment(
-                self.data, self.control_proportion
-            )
+            drawn_data = bootstrap(self.data)
             treatment_effect = estimate_treatment_effect_additive_metric(
                 drawn_data
             )
@@ -47,9 +37,5 @@ class AdditiveMetricRandomizationInference:
 
     def get_p_value(self) -> float:
         drawn_treatment_effects = self.draw_treatment_effects()
-        observe_treatment_effect = estimate_treatment_effect_additive_metric(
-            self.data
-        )
-        return get_p_value_randomized_inference(
-            observe_treatment_effect, drawn_treatment_effects
-        )
+        observed_treatment_effect = self.treatment_effect
+        return get_p_value_bootstrap(observed_treatment_effect, drawn_treatment_effects)

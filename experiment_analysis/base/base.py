@@ -1,3 +1,4 @@
+from scipy import stats
 from typing import List
 
 import numpy as np
@@ -39,6 +40,15 @@ def randomize_assignment(
 def bootstrap(data: pd.DataFrame) -> pd.DataFrame:
     return data.sample(frac=1, replace=True, ignore_index=True)
 
+
+def get_p_value_bootstrap(
+    observed_treatment_effect: float,
+    drawn_treatment_effects: NDArray[np.float64],
+) -> float:
+    se = drawn_treatment_effects.std()
+    z_statistic = observed_treatment_effect / se
+    p_value = 2 * stats.norm.sf(z_statistic, loc=0, scale=1)
+    return p_value
 
 def get_p_value_randomized_inference(
     observed_treatment_effect: float,

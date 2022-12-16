@@ -5,8 +5,8 @@ import pandas as pd
 import pytest
 from scipy.stats import chisquare
 
-from experiment_analysis.ab.additive_metric.additive_metric_randomization_inference import (
-    AdditiveMetricRandomizationInference,
+from experiment_analysis.ab.additive_metric.additive_metric_bootstrap_inference import (
+    AdditiveMetricBootstrapInference
 )
 from experiment_analysis.constants import METRIC, VARIATION
 
@@ -14,18 +14,18 @@ from experiment_analysis.constants import METRIC, VARIATION
 class TestRandomizationInference:
 
     def test_treatment_effect(self, test_data_constant_treatment_effect: Any) -> None:
-        rand_inf = AdditiveMetricRandomizationInference(
+        rand_inf = AdditiveMetricBootstrapInference(
             data=test_data_constant_treatment_effect, num_draws=1000
         )
         assert rand_inf.treatment_effect == 1
 
     def test_draw_treatment_effects(self, test_data: Any) -> None:
-        # drawn treatment effects should center around zero even if the true treatment effect is non-zero.
-        rand_inf = AdditiveMetricRandomizationInference(
+        # drawn treatment effects should center around true treatment effect of 1
+        rand_inf = AdditiveMetricBootstrapInference(
             data=test_data, num_draws=10000
         )
         drawn_treatment_effects = rand_inf.draw_treatment_effects()
-        assert -0.01 < drawn_treatment_effects.mean() < 0.01
+        assert 0.90 < drawn_treatment_effects.mean() < 1.1
 
     @pytest.mark.slow
     def test_p_value(self) -> None:
@@ -46,7 +46,7 @@ class TestRandomizationInference:
             metric = np.random.normal(0, 1, size=(2000,))
             data = {METRIC: metric, VARIATION: variation}
             df = pd.DataFrame.from_dict(data)
-            rand_inf = AdditiveMetricRandomizationInference(
+            rand_inf = AdditiveMetricBootstrapInference(
                 data=df, num_draws=1000
             )
             p_value = rand_inf.get_p_value()
