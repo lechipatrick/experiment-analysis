@@ -1,20 +1,20 @@
-from typing import Any
-
 import numpy as np
 import pandas as pd
 import pytest
-from pydantic import BaseModel, ValidationError, validator
 from scipy.stats import chisquare
 
 from experiment_analysis.ab.additive_metric.additive_metric import (
     AdditiveMetricInference,
 )
 from experiment_analysis.constants import METRIC, VARIATION
-from experiment_analysis.ab.additive_metric.additive_metric import AdditiveMetricData
-from experiment_analysis.data_models.additive_metric_data import AdditiveMetricData
-import pytest
+from experiment_analysis.data_models.additive_metric_data import (
+    AdditiveMetricData,
+)
 
-def generate_test_data(treatment_effect: float = 1, std: float = 1):
+
+def generate_test_data(
+    treatment_effect: float = 1, std: float = 1
+) -> AdditiveMetricData:
     # generate experiment data corresponding to specified treatment effect and variance
     # if variance is zero, then we get constant treatment effect
     # if variance is non-zero, then we get average treatment effect
@@ -24,7 +24,9 @@ def generate_test_data(treatment_effect: float = 1, std: float = 1):
     variation_treatment = ["treatment" for _ in range(num_units)]
 
     metric_control = np.random.normal(loc=0, scale=std, size=(num_units,))
-    metric_treatment = np.random.normal(loc=treatment_effect, scale=std, size=(num_units,))
+    metric_treatment = np.random.normal(
+        loc=treatment_effect, scale=std, size=(num_units,)
+    )
 
     data = {
         METRIC: np.hstack((metric_control, metric_treatment)),
@@ -34,26 +36,40 @@ def generate_test_data(treatment_effect: float = 1, std: float = 1):
     return AdditiveMetricData(data=df)
 
 
-def test_get_control_proportion():
+def test_get_control_proportion() -> None:
     test_data = generate_test_data(treatment_effect=1, std=1)
-    assert AdditiveMetricInference.get_control_proportion(test_data.data) == 0.5
+    assert (
+        AdditiveMetricInference.get_control_proportion(test_data.data) == 0.5
+    )
 
-def test_estimate_treatment_effect_additive_metric():
+
+def test_estimate_treatment_effect_additive_metric() -> None:
     test_data = generate_test_data(1, 0)
-    assert AdditiveMetricInference.estimate_treatment_effect(test_data.data) == 1.0
+    assert (
+        AdditiveMetricInference.estimate_treatment_effect(test_data.data)
+        == 1.0
+    )
 
-def test_treatment_effect():
+
+def test_treatment_effect() -> None:
     test_data = generate_test_data(1, 0)
     assert AdditiveMetricInference(test_data).treatment_effect == 1.0
 
-def test_p_value():
+
+def test_p_value() -> None:
     test_data = generate_test_data(1, 0)
     inference = AdditiveMetricInference(test_data)
-    assert inference.get_p_value(method="bootstrap", num_bootstraps=1000) < 0.01
-    assert inference.get_p_value(method="randomization", num_randomizations=1000) < 0.01
+    assert (
+        inference.get_p_value(method="bootstrap", num_bootstraps=1000) < 0.01
+    )
+    assert (
+        inference.get_p_value(method="randomization", num_randomizations=1000)
+        < 0.01
+    )
+
 
 @pytest.mark.slow
-def test_p_value_distribution():
+def test_p_value_distribution() -> None:
 
     """
     If the null is indeed true, p-values should follow a uniform distribution. Furthermore, if we use a 0.05
@@ -69,11 +85,14 @@ def test_p_value_distribution():
             print(f"at iteration {i}")
         test_data = generate_test_data(treatment_effect=0, std=1)
         inference = AdditiveMetricInference(test_data)
-        p_value_bootstrap = inference.get_p_value(method="bootstrap", num_bootstraps=1000)
-        p_value_randomization = inference.get_p_value(method="randomization", num_randomizations=1000)
+        p_value_bootstrap = inference.get_p_value(
+            method="bootstrap", num_bootstraps=1000
+        )
+        p_value_randomization = inference.get_p_value(
+            method="randomization", num_randomizations=1000
+        )
         pvalues_bootstrap[i] = p_value_bootstrap
         pvalues_randomization[i] = p_value_randomization
-
 
     # fpr should be around 5%
     for pvalues in [pvalues_bootstrap, pvalues_randomization]:

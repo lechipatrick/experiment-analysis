@@ -37,9 +37,9 @@ class Bootstrap:
 
     @classmethod
     def get_p_value(
-        cls, estimate, bootstrapped_estimates: NDArray[np.float64]
+        cls, estimate: float, bootstrapped_estimates: NDArray[np.float64]
     ) -> float:
         se = bootstrapped_estimates.std()
         z_statistic = estimate / se
         p_value = 2 * stats.norm.sf(z_statistic, loc=0, scale=1)
-        return p_value
+        return p_value  # type: ignore

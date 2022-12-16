@@ -1,4 +1,5 @@
 import pandas as pd
+
 from experiment_analysis.constants import (
     BOOTSTRAP,
     CONTROL,
@@ -6,7 +7,6 @@ from experiment_analysis.constants import (
     RANDOMIZATION,
     TREATMENT,
     VARIATION,
-    ZTEST,
 )
 from experiment_analysis.data_models.additive_metric_data import (
     AdditiveMetricData,
@@ -30,9 +30,7 @@ class AdditiveMetricInference:
         return control_proportion  # type: ignore
 
     @classmethod
-    def estimate_treatment_effect(
-        cls, data: pd.DataFrame
-    ) -> float:
+    def estimate_treatment_effect(cls, data: pd.DataFrame) -> float:
         control_mean = data[data[VARIATION] == CONTROL][METRIC].mean()
         treatment_mean = data[data[VARIATION] == TREATMENT][METRIC].mean()
 
@@ -41,19 +39,16 @@ class AdditiveMetricInference:
     @property
     def treatment_effect(self) -> float:
         if not self._treatment_effect:
-            self._treatment_effect = (
-                self.estimate_treatment_effect(self.data)
-            )
+            self._treatment_effect = self.estimate_treatment_effect(self.data)  # type: ignore
         return self._treatment_effect  # type: ignore
 
-    def get_p_value(self, method=RANDOMIZATION, *args, **kwargs):
+    def get_p_value(self, method: str = RANDOMIZATION, *args, **kwargs) -> float:
         if method == RANDOMIZATION:
             return self._get_p_value_randomization(*args, **kwargs)
         elif method == BOOTSTRAP:
             return self._get_p_value_bootstrap(*args, **kwargs)
-        elif method == ZTEST:
+        else:
             raise NotImplementedError
-            # return self._get_p_value_z_test(*args, **kwargs)
 
     def _get_p_value_bootstrap(self, num_bootstraps: int) -> float:
         bootstrapped_estimates = Bootstrap.get_simple_bootstrapped_estimates(

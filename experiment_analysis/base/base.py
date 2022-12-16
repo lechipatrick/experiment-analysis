@@ -5,7 +5,7 @@ import pandas as pd
 from numpy.typing import NDArray
 from scipy import stats
 
-from experiment_analysis.constants import CONTROL, METRIC, TREATMENT, VARIATION
+from experiment_analysis.constants import CONTROL, TREATMENT, VARIATION
 
 
 def get_control_proportion(data: pd.DataFrame) -> float:
@@ -41,7 +41,7 @@ def get_p_value_bootstrap(
     se = drawn_treatment_effects.std()
     z_statistic = observed_treatment_effect / se
     p_value = 2 * stats.norm.sf(z_statistic, loc=0, scale=1)
-    return p_value
+    return p_value  # type: ignore
 
 
 def get_p_value_randomized_inference(

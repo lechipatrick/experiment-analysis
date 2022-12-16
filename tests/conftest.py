@@ -14,7 +14,9 @@ def test_data(treatment_effect: float = 1) -> pd.DataFrame:
     variation_treatment = [TREATMENT for _ in range(num_units)]
 
     metric_control = np.random.normal(loc=0, scale=1, size=(num_units,))
-    metric_treatment = np.random.normal(loc=treatment_effect, scale=1, size=(num_units,))
+    metric_treatment = np.random.normal(
+        loc=treatment_effect, scale=1, size=(num_units,)
+    )
 
     data = {
         METRIC: np.hstack((metric_control, metric_treatment)),
@@ -25,7 +27,9 @@ def test_data(treatment_effect: float = 1) -> pd.DataFrame:
 
 
 @pytest.fixture
-def test_data_constant_treatment_effect(treatment_effect: float = 1) -> pd.DataFrame:
+def test_data_constant_treatment_effect(
+    treatment_effect: float = 1,
+) -> pd.DataFrame:
     # similar to test_data fixture, but fix treatment effect to be constant 1
     num_units = 1000
 
