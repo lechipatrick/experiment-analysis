@@ -60,7 +60,7 @@ def test_p_value_distribution():
     threshold to reject the null, then the fraction of such rejections should be around 5 percent
     """
     # generate the p-values
-    num_sims = 100
+    num_sims = 1000
     pvalues_bootstrap = np.zeros((num_sims,))
     pvalues_randomization = np.zeros((num_sims,))
 
@@ -81,7 +81,6 @@ def test_p_value_distribution():
         assert 0.04 < fpr < 0.06
 
     # p values should be uniformly distributed
-    # generate the empirical frequencies
     num_buckets = 20
     for pvalues in [pvalues_bootstrap, pvalues_randomization]:
         f_obs = np.zeros((num_buckets,))
