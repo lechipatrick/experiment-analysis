@@ -7,6 +7,11 @@ from scipy import stats
 
 
 class Bootstrap:
+    """
+    provides various bootstrap-related statistical procedures
+    for speed, operations are limited to numpy arrays
+    """
+
     @classmethod
     def simple_bootstrap_data(cls, data: pd.DataFrame) -> pd.DataFrame:
         return data.sample(frac=1, replace=True, ignore_index=True)
