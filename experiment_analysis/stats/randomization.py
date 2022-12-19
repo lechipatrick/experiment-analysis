@@ -1,51 +1,48 @@
 from typing import Any, Callable
 
 import numpy as np
-import pandas as pd
 from numpy.typing import NDArray
-
-from experiment_analysis.constants import CONTROL, TREATMENT, VARIATION
 
 
 class Randomization:
-    @classmethod
-    def simple_randomize_assignment_data(
-        cls, data: pd.DataFrame, control_proportion: float
-    ) -> pd.DataFrame:
-        rv = np.random.uniform(low=0, high=1, size=(len(data),))
-        randomized_assignment = np.where(
-            rv < control_proportion, CONTROL, TREATMENT
-        )
-
-        randomized_assignment_data = data.copy()
-        randomized_assignment_data[VARIATION] = randomized_assignment
-
-        return randomized_assignment_data
+    """
+    provides various randomization-related statistical procedures
+    for speed, operations are limited to numpy arrays
+    """
 
     @classmethod
-    def get_simple_randomized_assignment_estimates(
+    def get_simple_random_assignment(
+        cls, size: int, control_proportion: float
+    ) -> NDArray[np.int64]:
+        # returns a numpy array of integers, with values of 0, 1
+        # value of 0 corresponds to "control" and value of 1 corresponds to "treatment"
+        rv = np.random.uniform(low=0, high=1, size=(size,))
+        random_assignment = np.where(rv < control_proportion, 0, 1)
+        return random_assignment
+
+    @classmethod
+    def get_simple_random_assignment_estimates(
         cls,
-        data: pd.DataFrame,
-        estimation_func: Callable[[pd.DataFrame], Any],
+        metric: NDArray[np.float64],
+        estimation_func: Callable[[Any], float],
         control_proportion: float,
         num_randomizations: int,
     ) -> NDArray[np.float64]:
+        size = len(metric)
 
-        randomized_assignment_estimates = np.zeros((num_randomizations,))
+        estimates = np.zeros((num_randomizations,))
 
         for i in range(num_randomizations):
-            randomized_assignment_data = cls.simple_randomize_assignment_data(
-                data, control_proportion
+            random_assignment = cls.get_simple_random_assignment(
+                size, control_proportion
             )
-            estimate = estimation_func(randomized_assignment_data)
-            randomized_assignment_estimates[i] = estimate
+            estimate = estimation_func(metric, random_assignment)  # type: ignore
+            estimates[i] = estimate
 
-        return randomized_assignment_estimates
+        return estimates
 
     @classmethod
-    def cluster_randomize_assignment_data(
-        cls, data: pd.DataFrame, cluster_col: str
-    ) -> pd.DataFrame:
+    def get_cluster_random_assignment(cls) -> NDArray[np.float64]:
         # randomize assignment status at the level of clusters instead of at the level of units
         # need a cluster identifier in the data
         pass
