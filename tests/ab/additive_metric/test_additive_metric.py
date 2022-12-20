@@ -95,7 +95,6 @@ def assert_p_values_under_null(
 
     # fpr should be around 5%
     fpr = np.where(p_values < 0.05, 1, 0).mean()
-    print(fpr)
     assert 0.04 < fpr < 0.06
 
     # p values should be uniformly distributed
@@ -132,7 +131,7 @@ def test_p_value_distribution_bootstrap_under_null() -> None:
     assert_p_values_under_null(
         method="bootstrap",
         num_units=1000,
-        num_sims=5000,
+        num_sims=1000,
         num_bootstraps=1000,
     )
 
@@ -142,7 +141,7 @@ def assert_p_values_under_alternative(
 ) -> None:
     p_values = np.zeros(num_sims)
     for i in tqdm(range(num_sims)):
-        # this test_data should give 80% power
+        # this test_data should give 80% power at 5% size
         test_data = generate_test_data(
             num_units=1570 * 2,
             treatment_effect=1,
@@ -173,5 +172,5 @@ def test_p_value_distribution_randomization_under_alternative() -> None:
 @pytest.mark.power
 def test_p_value_distribution_bootstrap_under_alternative() -> None:
     assert_p_values_under_alternative(
-        method="bootstrap", num_sims=5000, num_bootstrap=1000
+        method="bootstrap", num_sims=1000, num_bootstraps=1000
     )
