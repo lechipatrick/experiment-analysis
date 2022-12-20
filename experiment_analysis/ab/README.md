@@ -8,6 +8,7 @@ There are $n$ units. Each unit is assigned to either control group $C$ or treatm
 
 Treatment effect is defined as the difference between (1) the metric mean in the scenario where every unit is assigned to treatment, and (2) the metric mean where every unit is assigned to control. We are generally interested in whether the treatment effect is non-zero.
 
+Common examples of additive metric: purchase volume, number of shared rides taken, etc.
 ### ztest
 The estimation framework is that of Neyman's repeated sampling approach.
 
@@ -44,8 +45,22 @@ The procedure draws, with replacement, from the data until it gets $n$ units. Th
 See An Introduction to the Bootstrap by Efron and Tibshirani.
 
 ## Ratio metric
-There are 4 inference methods: delta, fieler, randomization, and bootstrap. To describe these, we need a bit of notation.
+There are 4 inference methods: delta, Fieller, randomization, and bootstrap. To describe these, we need a bit of notation.
 
 There are $n$ units. Each unit is assigned to either control group $C$ or treatment group $T$. A numerator metric $x_i$ and denominator metric $y_i$ are observed for each unit $i$. 
 
-The ratio metric for a group $G$ is defined as $r_G = \frac{\sum_{i \in G} x_i}{\sum_{i \in G} y_i}$
+The ratio metric for a group $G$ is defined as $r_G = \frac{\sum_{i \in G} x_i}{\sum_{i \in G} y_i}$.
+
+Treatment effect is defined as the difference between (1) the ratio metric in the scenario where every unit is assigned to treatment, and (2) the ratio metric where every unit is assigned to control. We are generally interested in whether the treatment effect is non-zero.
+
+Common examples of ratio metric: click thru rate (numerator = click, denominator = impression), purchase rate conditional on add to cart (numerator = purchase or not, denominator = add to cart or not), etc.
+
+### randomization
+Same as randomization for additive metric.
+
+### bootstrap
+Same as bootstrap for additive metric.
+
+### delta method
+
+### Fieller method
