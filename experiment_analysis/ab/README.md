@@ -16,7 +16,7 @@ Treatment effect is estimated as difference in means $\tau = \bar x_T - \bar x_C
 
 Estimated variance of the difference in means $v = \frac{1}{|T|} s^2_T + \frac{1}{|T|} s^2_C$
 
-The z statistic is defined to be $z = \frac{\tau}{\sqrt{v}}
+The z statistic is defined to be $z = \frac{\tau}{\sqrt{v}}$
 
 
 #### Ratio metric
