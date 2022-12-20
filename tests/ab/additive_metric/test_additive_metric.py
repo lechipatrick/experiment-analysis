@@ -60,17 +60,13 @@ def test_estimate_treatment_effect() -> None:
 
 
 def test_assignment() -> None:
-    test_data = generate_test_data(num_units=1000, treatment_effect=1, std=0)
+    test_data = generate_test_data(num_units=1000, treatment_effect=1, std=0, control_proportion=0.2)
     assert AdditiveMetricInference(test_data).assignment.mean() == 0.8
 
 
 def test_p_value_when_treatment_effect_large() -> None:
-    test_data = generate_test_data(num_units=1000, treatment_effect=1, std=0)
+    test_data = generate_test_data(num_units=1000, treatment_effect=1, std=0.1)
     inference = AdditiveMetricInference(test_data)
-    # assert (
-    #     inference.get_p_value(method="bootstrap", num_bootstraps=1000) < 0.01
-    # )
-
     assert inference.get_p_value(method="ztest") < 0.01
     assert (
         inference.get_p_value(method="randomization", num_randomizations=1000)
