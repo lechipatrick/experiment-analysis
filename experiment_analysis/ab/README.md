@@ -1,19 +1,21 @@
-## User A/B experiments
+# User A/B experiments
 
-### Additive metric
+## Additive metric
 
 There are 3 inference methods: ztest, randomization, and bootstrap. To describe these, we need a bit of notation.
 
 There are $n$ units. Each unit is assigned to either control group $C$ or treatment group $T$. A metric $x_i$ is observed for each unit $i$.
 
-#### ztest
+Treatment effect is defined as the difference between (1) the metric mean in the scenario where every unit is assigned to treatment, and (2) the metric mean where every unit is assigned to control. We are generally interested in whether the treatment effect is non-zero.
+
+### ztest
 The estimation framework is that of Neyman's repeated sampling approach.
 
 Denote the metric mean in group $G$ as $\bar x_G = \frac{1}{|G|} \sum_{i \in G} x_i$, where $G$ can be $C$ or $T$.
 
-Denote the metric variance in group $G$ as $s^2_G = \frac{1}{|G|} \sum_{i \in G} (x_i - \bar x_G)^2$.
-
 Treatment effect is estimated as difference in means $\hat \tau = \bar x_T - \bar x_C$
+
+Denote the metric variance in group $G$ as $s^2_G = \frac{1}{|G|} \sum_{i \in G} (x_i - \bar x_G)^2$.
 
 Estimated variance of the difference in means $\hat v = \frac{1}{|T|} s^2_T + \frac{1}{|T|} s^2_C$
 
@@ -27,18 +29,23 @@ Confidence interval is based on the point estimate of the treatment effect, the 
 
 See Causal Inference for Statistics, Social, and Biomedical Sciences by Imbens and Rubin, chapter 6.
 
-#### randomization
+### randomization
 Randomization inference assumes a sharp null (treatment effect is exactly zero for every single unit). The procedure involves randomly re-assigning the treatment status (whether a unit is in $C$ or $T$), and computing the treatment effect of the resulting data. Doing so repeatedly yields an empirical distribution of the treatment effect under the null. Comparing the actual, estimated treatment effect against this distribution provides a measure of how unlikely the null is, and is how p-value is calculated.
 
 This approach doesn't lend itself naturally to a notion of confidence interval.
 
 See Causal Inference for Statistics, Social, and Biomedical Sciences by Imbens and Rubin, chapter 5.
 
-#### bootstrap
+### bootstrap
 Bootstrap provides an alternate way to computing the variance of the estimator. For additive metric, this is rather trivial, but for other metrics, the variance can be hard to compute. 
 
 The procedure draws, with replacement, from the data until it gets $n$ units. The treatment effect is estimated from this bootstrapped data. Doing so repeatedly yields an empirical distribution of the treatment effect. The variance of this empirical distribution is used to compute the z statistic and the confidence interval.
 
 See An Introduction to the Bootstrap by Efron and Tibshirani.
 
-#### Ratio metric
+## Ratio metric
+There are 4 inference methods: delta, fieler, randomization, and bootstrap. To describe these, we need a bit of notation.
+
+There are $n$ units. Each unit is assigned to either control group $C$ or treatment group $T$. A numerator metric $x_i$ and denominator metric $y_i$ are observed for each unit $i$. 
+
+The ratio metric for a group $G$ is defined as $r_G = \frac{\sum_{i \in G} x_i}{\sum_{i \in G} y_i}$
