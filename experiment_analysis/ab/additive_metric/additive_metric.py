@@ -15,7 +15,7 @@ from experiment_analysis.data_models.additive_metric_data import (
 )
 from experiment_analysis.stats.bootstrap import Bootstrap
 from experiment_analysis.stats.randomization import Randomization
-from experiment_analysis.stats.ztest import ZTest
+from experiment_analysis.stats.zstatistic import ZStatistic
 
 
 class AdditiveMetricInference:
@@ -66,9 +66,7 @@ class AdditiveMetricInference:
             )  # type: ignore
         return self._treatment_effect  # type: ignore
 
-    def get_p_value(
-        self, method: str = RANDOMIZATION, *args: int, **kwargs: int
-    ) -> float:
+    def get_p_value(self, method: str, *args: int, **kwargs: int) -> float:
         if method == RANDOMIZATION:
             return self._get_p_value_randomization(*args, **kwargs)
         elif method == BOOTSTRAP:
@@ -79,7 +77,7 @@ class AdditiveMetricInference:
             raise NotImplementedError
 
     def _get_p_value_randomization(self, num_randomizations: int) -> float:
-        randomized_estimates = (
+        randomization_estimates = (
             Randomization.get_simple_random_assignment_estimates(
                 metric=self.metric,
                 estimation_func=self.estimate_treatment_effect,  # type: ignore
@@ -88,7 +86,7 @@ class AdditiveMetricInference:
             )
         )
         return Randomization.get_p_value(
-            self.treatment_effect, randomized_estimates
+            self.treatment_effect, randomization_estimates
         )
 
     def _get_p_value_z_test(self) -> float:
@@ -96,19 +94,23 @@ class AdditiveMetricInference:
         control = self.metric[self.assignment == 0]
         treatment = self.metric[self.assignment == 1]
 
-        std = np.sqrt(
+        se = np.sqrt(
             control.var() / len(control) + treatment.var() / len(treatment)
         )
-        return ZTest.get_p_value(self.treatment_effect, std)
+        return ZStatistic.get_p_value(self.treatment_effect, se)
 
     def _get_p_value_bootstrap(self, num_bootstraps: int) -> float:
-        bootstrapped_estimates = Bootstrap.get_simple_bootstrapped_estimates(
-            self.data,
+        # get data in the right shape (n, 2) for bootstrap
+        data = np.hstack(
+            (self.metric.reshape((-1, 1)), self.assignment.reshape((-1, 1)))
+        )
+        bootstrap_estimates = Bootstrap.get_simple_bootstrap_estimates(
+            data,
             self.estimate_treatment_effect,  # type: ignore
             num_bootstraps,
         )
         return Bootstrap.get_p_value(
-            self.treatment_effect, bootstrapped_estimates
+            self.treatment_effect, bootstrap_estimates
         )
 
     def get_confidence_interval(

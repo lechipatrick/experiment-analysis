@@ -13,9 +13,9 @@ def test_data(treatment_effect: float = 1) -> pd.DataFrame:
     variation_control = [CONTROL for _ in range(num_units)]
     variation_treatment = [TREATMENT for _ in range(num_units)]
 
-    metric_control = np.random.normal(loc=0, scale=1, size=(num_units,))
+    metric_control = np.random.normal(loc=0, scale=1, size=num_units)
     metric_treatment = np.random.normal(
-        loc=treatment_effect, scale=1, size=(num_units,)
+        loc=treatment_effect, scale=1, size=num_units
     )
 
     data = {
@@ -36,8 +36,8 @@ def test_data_constant_treatment_effect(
     variation_control = [CONTROL for _ in range(num_units)]
     variation_treatment = [TREATMENT for _ in range(num_units)]
 
-    metric_control = np.zeros((num_units,))
-    metric_treatment = np.ones((num_units,)) * treatment_effect
+    metric_control = np.zeros(num_units)
+    metric_treatment = np.ones(num_units) * treatment_effect
 
     data = {
         METRIC: np.hstack((metric_control, metric_treatment)),

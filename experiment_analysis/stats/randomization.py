@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 
 class Randomization:
     """
-    provides various randomization-related statistical procedures
+    holds various randomization-related statistical procedures
     for speed, operations are limited to numpy arrays
     """
 
@@ -16,7 +16,7 @@ class Randomization:
     ) -> NDArray[np.int64]:
         # returns a numpy array of integers, with values of 0, 1
         # value of 0 corresponds to "control" and value of 1 corresponds to "treatment"
-        rv = np.random.uniform(low=0, high=1, size=(size,))
+        rv = np.random.uniform(low=0, high=1, size=size)
         random_assignment = np.where(rv < control_proportion, 0, 1)
         return random_assignment
 
@@ -28,9 +28,10 @@ class Randomization:
         control_proportion: float,
         num_randomizations: int,
     ) -> NDArray[np.float64]:
+
         size = len(metric)
 
-        estimates = np.zeros((num_randomizations,))
+        estimates = np.zeros(num_randomizations)
 
         for i in range(num_randomizations):
             random_assignment = cls.get_simple_random_assignment(
@@ -51,9 +52,9 @@ class Randomization:
     def get_p_value(
         cls,
         estimate: float,
-        randomized_assignment_estimates: NDArray[np.float64],
+        random_assignment_estimates: NDArray[np.float64],
     ) -> float:
         p_value = (
-            np.abs(randomized_assignment_estimates) > np.abs(estimate)
+            np.abs(random_assignment_estimates) > np.abs(estimate)
         ).mean()
         return p_value  # type: ignore

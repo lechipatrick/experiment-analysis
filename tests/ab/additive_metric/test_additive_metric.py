@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 from scipy.stats import chisquare
 from tqdm import tqdm
 
@@ -16,7 +17,7 @@ def generate_test_data(
     num_units: int,
     treatment_effect: float,
     std: float,
-    control_proportion: float = 0.2,
+    control_proportion: float = 0.5,
 ) -> AdditiveMetricData:
     # generate experiment data corresponding to specified treatment effect and variance
     # if variance is zero, then we get constant treatment effect
@@ -30,11 +31,9 @@ def generate_test_data(
     variation_control = ["control" for _ in range(control_num_units)]
     variation_treatment = ["treatment" for _ in range(treatment_num_units)]
 
-    metric_control = np.random.normal(
-        loc=0, scale=std, size=(control_num_units,)
-    )
+    metric_control = np.random.normal(loc=0, scale=std, size=control_num_units)
     metric_treatment = np.random.normal(
-        loc=treatment_effect, scale=std, size=(treatment_num_units,)
+        loc=treatment_effect, scale=std, size=treatment_num_units
     )
 
     data = {
@@ -46,7 +45,9 @@ def generate_test_data(
 
 
 def test_control_proportion() -> None:
-    test_data = generate_test_data(num_units=1000, treatment_effect=1, std=1)
+    test_data = generate_test_data(
+        num_units=1000, treatment_effect=1, std=1, control_proportion=0.2
+    )
     assert (
         np.abs(AdditiveMetricInference(test_data).control_proportion - 0.2)
         < 0.00001
@@ -69,16 +70,21 @@ def test_p_value_when_treatment_effect_large() -> None:
     # assert (
     #     inference.get_p_value(method="bootstrap", num_bootstraps=1000) < 0.01
     # )
+
+    assert inference.get_p_value(method="ztest") < 0.01
     assert (
         inference.get_p_value(method="randomization", num_randomizations=1000)
         < 0.01
+    )
+    assert (
+        inference.get_p_value(method="bootstrap", num_bootstraps=1000) < 0.01
     )
 
 
 def assert_p_values_under_null(
     method: str, num_units: int, num_sims: int, *args: int, **kwargs: int
 ) -> None:
-    p_values = np.zeros((num_sims,))
+    p_values = np.zeros(num_sims)
     for i in tqdm(range(num_sims)):
         test_data = generate_test_data(
             num_units=num_units, treatment_effect=0, std=1
@@ -89,11 +95,13 @@ def assert_p_values_under_null(
 
     # fpr should be around 5%
     fpr = np.where(p_values < 0.05, 1, 0).mean()
+    print(fpr)
     assert 0.04 < fpr < 0.06
 
     # p values should be uniformly distributed
     num_buckets = 20
-    f_obs = np.zeros((num_buckets,))
+    f_obs = np.zeros(num_buckets)
+
     for i in range(0, 20):
         start = i * 0.05
         end = (i + 1) * 0.05
@@ -104,10 +112,35 @@ def assert_p_values_under_null(
     assert p > 0.05
 
 
+@pytest.mark.fpr
+def test_p_value_distribution_z_test_under_null() -> None:
+    assert_p_values_under_null(method="ztest", num_units=1000, num_sims=10000)
+
+
+@pytest.mark.fpr
+def test_p_value_distribution_randomization_under_null() -> None:
+    assert_p_values_under_null(
+        method="randomization",
+        num_units=1000,
+        num_sims=1000,
+        num_randomizations=1000,
+    )
+
+
+@pytest.mark.fpr
+def test_p_value_distribution_bootstrap_under_null() -> None:
+    assert_p_values_under_null(
+        method="bootstrap",
+        num_units=1000,
+        num_sims=5000,
+        num_bootstraps=1000,
+    )
+
+
 def assert_p_values_under_alternative(
     method: str, num_sims: int, *args: int, **kwargs: int
 ) -> None:
-    p_values = np.zeros((num_sims,))
+    p_values = np.zeros(num_sims)
     for i in tqdm(range(num_sims)):
         # this test_data should give 80% power
         test_data = generate_test_data(
@@ -125,20 +158,20 @@ def assert_p_values_under_alternative(
     assert 0.75 < detection_rate < 0.85
 
 
-def test_p_value_distribution_z_test_under_null() -> None:
-    assert_p_values_under_null(method="ztest", num_units=1000, num_sims=10000)
+@pytest.mark.power
+def test_p_value_distribution_z_test_under_alternative() -> None:
+    assert_p_values_under_alternative(method="ztest", num_sims=1000)
 
 
-def test_p_value_distribution_randomization_under_null() -> None:
-    assert_p_values_under_null(
-        method="randomization",
-        num_units=1000,
-        num_sims=1000,
-        num_randomizations=1000,
-    )
-
-
+@pytest.mark.power
 def test_p_value_distribution_randomization_under_alternative() -> None:
     assert_p_values_under_alternative(
         method="randomization", num_sims=1000, num_randomizations=1000
+    )
+
+
+@pytest.mark.power
+def test_p_value_distribution_bootstrap_under_alternative() -> None:
+    assert_p_values_under_alternative(
+        method="bootstrap", num_sims=5000, num_bootstrap=1000
     )
