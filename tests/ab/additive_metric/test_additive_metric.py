@@ -4,9 +4,7 @@ import pytest
 from scipy.stats import chisquare
 from tqdm import tqdm
 
-from experiment_analysis.ab.additive_metric.additive_metric import (
-    AdditiveMetricInference,
-)
+from experiment_analysis.ab.additive_metric import AdditiveMetricInference
 from experiment_analysis.constants import METRIC, VARIATION
 from experiment_analysis.data_models.additive_metric_data import (
     AdditiveMetricData,
@@ -60,7 +58,9 @@ def test_estimate_treatment_effect() -> None:
 
 
 def test_assignment() -> None:
-    test_data = generate_test_data(num_units=1000, treatment_effect=1, std=0, control_proportion=0.2)
+    test_data = generate_test_data(
+        num_units=1000, treatment_effect=1, std=0, control_proportion=0.2
+    )
     assert AdditiveMetricInference(test_data).assignment.mean() == 0.8
 
 

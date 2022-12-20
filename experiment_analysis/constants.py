@@ -2,6 +2,8 @@ CONTROL = "control"
 TREATMENT = "treatment"
 VARIATION = "variation"
 METRIC = "metric"
+METRIC_NUMERATOR = "metric_numerator"
+METRIC_DENOMINATOR = "metric_denominator"
 
 RANDOMIZATION = "randomization"
 BOOTSTRAP = "bootstrap"
