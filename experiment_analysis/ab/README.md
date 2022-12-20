@@ -7,7 +7,7 @@ There are 3 inference methods: ztest, randomization, and bootstrap. To describe 
 There are $n$ units. Each unit is assigned to either control group $C$ or treatment group $T$. A metric $x_i$ is observed for each unit $i$.
 
 #### ztest
-The estimation framework is that of Neyman's repeated sampling approach (see Causal Inference for Statistic, Social, and Biomedical Sciences by Imbens and Rubins).
+The estimation framework is that of Neyman's repeated sampling approach.
 
 Denote the metric mean in group $G$ as $\bar x_G = \frac{1}{|G|} \sum_{i \in G} x_i$, where $G$ can be $C$ or $T$.
 
@@ -19,8 +19,26 @@ Estimated variance of the difference in means $\hat v = \frac{1}{|T|} s^2_T + \f
 
 Under certain assumptions, $\hat \tau$ is a good estimator of the true treatment effect (unbiased and consistent), and has variance $\hat v$.
 
-The z statistic is defined to be $z = \frac{\tau}{\sqrt{\hat v}}$. Under the null, the z statistic would be normally distributed with zero mean and unit variance. 
+The z statistic is defined to be $z = \frac{\hat \tau}{\sqrt{\hat v}}$. Under the null, the z statistic would be normally distributed with zero mean and unit variance. 
 
 p-value is computed based on how far the z statistic strays from this $N(0,1)$ distribution.
+
+Confidence interval is based on the point estimate of the treatment effect, the estimated variance.
+
+See Causal Inference for Statistics, Social, and Biomedical Sciences by Imbens and Rubin, chapter 6.
+
+#### randomization
+Randomization inference assumes a sharp null (treatment effect is exactly zero for every single unit). The procedure involves randomly re-assigning the treatment status (whether a unit is in $C$ or $T$), and computing the treatment effect of the resulting data. Doing so repeatedly yields an empirical distribution of the treatment effect under the null. Comparing the actual, estimated treatment effect against this distribution provides a measure of how unlikely the null is, and is how p-value is calculated.
+
+This approach doesn't lend itself naturally to a notion of confidence interval.
+
+See Causal Inference for Statistics, Social, and Biomedical Sciences by Imbens and Rubin, chapter 5.
+
+#### bootstrap
+Bootstrap provides an alternate way to computing the variance of the estimator. For additive metric, this is rather trivial, but for other metrics, the variance can be hard to compute. 
+
+The procedure draws, with replacement, from the data until it gets $n$ units. The treatment effect is estimated from this bootstrapped data. Doing so repeatedly yields an empirical distribution of the treatment effect. The variance of this empirical distribution is used to compute the z statistic and the confidence interval.
+
+See An Introduction to the Bootstrap by Efron and Tibshirani.
 
 #### Ratio metric
