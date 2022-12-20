@@ -1,47 +1,32 @@
-import numpy as np
 import pandas as pd
 import pytest
 
-from experiment_analysis.constants import CONTROL, METRIC, TREATMENT, VARIATION
+from experiment_analysis.constants import (
+    CONTROL,
+    METRIC,
+    METRIC_DENOMINATOR,
+    METRIC_NUMERATOR,
+    TREATMENT,
+    VARIATION,
+)
 
 
 @pytest.fixture
-def test_data(treatment_effect: float = 1) -> pd.DataFrame:
-    # generate metric data corresponding to 2000 units, with 50/50 control/treatment and average treatment effect = 1
-    num_units = 1000
-
-    variation_control = [CONTROL for _ in range(num_units)]
-    variation_treatment = [TREATMENT for _ in range(num_units)]
-
-    metric_control = np.random.normal(loc=0, scale=1, size=num_units)
-    metric_treatment = np.random.normal(
-        loc=treatment_effect, scale=1, size=num_units
-    )
-
+def test_data_additive() -> pd.DataFrame:
     data = {
-        METRIC: np.hstack((metric_control, metric_treatment)),
-        VARIATION: variation_control + variation_treatment,
+        METRIC: [1, 2, 3, 4],
+        VARIATION: [CONTROL, CONTROL, TREATMENT, TREATMENT],
     }
     df = pd.DataFrame.from_dict(data)
     return df
 
 
 @pytest.fixture
-def test_data_constant_treatment_effect(
-    treatment_effect: float = 1,
-) -> pd.DataFrame:
-    # similar to test_data fixture, but fix treatment effect to be constant 1
-    num_units = 1000
-
-    variation_control = [CONTROL for _ in range(num_units)]
-    variation_treatment = [TREATMENT for _ in range(num_units)]
-
-    metric_control = np.zeros(num_units)
-    metric_treatment = np.ones(num_units) * treatment_effect
-
+def test_data_ratio() -> pd.DataFrame:
     data = {
-        METRIC: np.hstack((metric_control, metric_treatment)),
-        VARIATION: variation_control + variation_treatment,
+        METRIC_NUMERATOR: [1, 2, 3, 4],
+        METRIC_DENOMINATOR: [5, 6, 7, 8],
+        VARIATION: [CONTROL, CONTROL, TREATMENT, TREATMENT],
     }
     df = pd.DataFrame.from_dict(data)
     return df
