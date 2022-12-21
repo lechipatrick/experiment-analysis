@@ -1,4 +1,5 @@
 from typing import List
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -98,7 +99,7 @@ class RatioMetricInference:
             self.treatment_effect, randomization_estimates
         )
 
-    def _get_p_value_z_test(self) -> float:
+    def _get_p_value_delta_method(self) -> float:
         # relies on CLT, assuming no outliers
         control = self.metric[self.assignment == 0]
         treatment = self.metric[self.assignment == 1]
@@ -107,6 +108,9 @@ class RatioMetricInference:
             control.var() / len(control) + treatment.var() / len(treatment)
         )
         return ZStatistic.get_p_value(self.treatment_effect, se)
+
+    def _get_p_value_fieller_method(self) -> float:
+        pass
 
     def _get_p_value_bootstrap(self, num_bootstraps: int) -> float:
         bootstrapper = Bootstrap(self.data)
