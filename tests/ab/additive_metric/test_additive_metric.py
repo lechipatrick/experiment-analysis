@@ -38,16 +38,6 @@ def generate_test_data(
     return AdditiveMetricData(data=df)
 
 
-def test_control_proportion() -> None:
-    test_data = generate_test_data(
-        num_units=1000, treatment_effect=1, std=1, control_proportion=0.2
-    )
-    assert (
-        np.abs(AdditiveMetricInference(test_data).control_proportion - 0.2)
-        < 0.00001
-    )
-
-
 def test_estimate_treatment_effect() -> None:
     test_data = generate_test_data(num_units=1000, treatment_effect=1, std=0)
     assert AdditiveMetricInference(test_data).treatment_effect == 1.0
@@ -73,7 +63,7 @@ def test_p_value_when_treatment_effect_large() -> None:
     )
 
 
-def assert_p_values_under_null(
+def assert_p_value_distribution_under_null(
     method: str, num_units: int, num_sims: int, *args: int, **kwargs: int
 ) -> None:
     p_values = np.zeros(num_sims)
@@ -105,13 +95,15 @@ def assert_p_values_under_null(
 
 
 @pytest.mark.fpr
-def test_p_value_distribution_z_test_under_null() -> None:
-    assert_p_values_under_null(method="ztest", num_units=1000, num_sims=10000)
+def test_p_value_distribution_under_null_ztest() -> None:
+    assert_p_value_distribution_under_null(
+        method="ztest", num_units=1000, num_sims=10000
+    )
 
 
 @pytest.mark.fpr
-def test_p_value_distribution_randomization_under_null() -> None:
-    assert_p_values_under_null(
+def test_p_value_distribution_under_null_randomization() -> None:
+    assert_p_value_distribution_under_null(
         method="randomization",
         num_units=1000,
         num_sims=1000,
@@ -120,8 +112,8 @@ def test_p_value_distribution_randomization_under_null() -> None:
 
 
 @pytest.mark.fpr
-def test_p_value_distribution_bootstrap_under_null() -> None:
-    assert_p_values_under_null(
+def test_p_value_distribution_under_null_bootstrap() -> None:
+    assert_p_value_distribution_under_null(
         method="bootstrap",
         num_units=1000,
         num_sims=1000,
