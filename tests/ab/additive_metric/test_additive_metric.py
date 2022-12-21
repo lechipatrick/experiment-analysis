@@ -87,6 +87,7 @@ def assert_p_values_under_null(
 
     # fpr should be around 5%
     fpr = np.where(p_values < 0.05, 1, 0).mean()
+    print(f"fpr under method {method} is {fpr}")
     assert 0.04 < fpr < 0.06
 
     # p values should be uniformly distributed
@@ -146,6 +147,7 @@ def assert_p_values_under_alternative(
 
     # fraction of significance findings should be around 0.8
     detection_rate = np.where(p_values < 0.05, 1, 0).mean()
+    print(f"detection rate under method {method} is {detection_rate}")
     assert 0.75 < detection_rate < 0.85
 
 

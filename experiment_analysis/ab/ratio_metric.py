@@ -4,15 +4,14 @@ from numpy.typing import NDArray
 
 from experiment_analysis.constants import (
     BOOTSTRAP,
+    DELTA,
+    FIELLER,
     METRIC,
     RANDOMIZATION,
     TREATMENT,
     VARIATION,
-DELTA, FIELLER
 )
-from experiment_analysis.data_models.ratio_metric_data import (
-    RatioMetricData
-)
+from experiment_analysis.data_models.ratio_metric_data import RatioMetricData
 from experiment_analysis.stats.bootstrap import Bootstrap
 from experiment_analysis.stats.randomization import Randomization
 from experiment_analysis.stats.zstatistic import ZStatistic
