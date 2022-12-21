@@ -15,7 +15,7 @@ class Bootstrap:
     def __init__(self, data: NDArray[np.float64]):
         # data should be array of shape (n, k) with the first k-1 columns being metrics, and the last column being
         # assignment
-        self.data = data
+        self.data = data.copy()
         self.size = len(data)
 
     def get_simple_bootstrap_data(self) -> NDArray[np.float64]:

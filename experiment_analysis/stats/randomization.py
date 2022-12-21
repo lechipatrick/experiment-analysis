@@ -11,7 +11,6 @@ class Randomization:
     """
 
     def __init__(self, data: NDArray[np.float64]) -> None:
-        self.data = data
         self._randomized_data = data.copy()
         self.size = len(data)
         self.control_proportion = 1 - data[:, -1].mean()
