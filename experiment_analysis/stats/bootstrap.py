@@ -16,7 +16,7 @@ class Bootstrap:
     def get_simple_bootstrap_data(
         cls, data: NDArray[np.float64], size: int
     ) -> NDArray[np.float64]:
-        # data should be array of shape (n, 2) with the first column being metric, and second column being
+        # data should be array of shape (n, k) with the first k-1 columns being metrics, and the last column being
         # assignment
         # size is the number of observations to draw. usually set to len(data)
         indices = np.random.choice(a=size, size=size, replace=True)
@@ -36,7 +36,7 @@ class Bootstrap:
 
         for i in range(num_bootstraps):
             bootstrap_data = cls.get_simple_bootstrap_data(data, size)
-            metric, assignment = bootstrap_data[:, 0], bootstrap_data[:, 1]
+            metric, assignment = bootstrap_data[:, -1], bootstrap_data[:, -1]
             estimate = estimation_func(metric, assignment)  # type: ignore
             estimates[i] = estimate
 

@@ -17,10 +17,6 @@ def generate_test_data(
     std: float,
     control_proportion: float = 0.5,
 ) -> AdditiveMetricData:
-    # generate experiment data corresponding to specified treatment effect and variance
-    # if variance is zero, then we get constant treatment effect
-    # if variance is non-zero, then we get average treatment effect
-    # 1/5 control, 4/5 treatment
     # TODO: figure out how to do this as a pytest.fixture
 
     control_num_units = int(num_units * control_proportion)
