@@ -25,13 +25,6 @@ class AdditiveMetricInference:
         self._treatment_effect = None
         self._metric = None
         self._assignment = None
-        self._control_proportion = None
-
-    @property
-    def control_proportion(self) -> float:
-        if self._control_proportion is None:
-            self._control_proportion = 1 - self.assignment.mean()
-        return self._control_proportion  # type: ignore
 
     @property
     def data(self) -> NDArray[np.float64]:
