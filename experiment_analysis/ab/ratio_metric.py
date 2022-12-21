@@ -4,22 +4,21 @@ from numpy.typing import NDArray
 
 from experiment_analysis.constants import (
     BOOTSTRAP,
+    DELTA,
+    FIELLER,
     METRIC,
     RANDOMIZATION,
     TREATMENT,
     VARIATION,
-    ZTEST,
 )
-from experiment_analysis.data_models.additive_metric_data import (
-    AdditiveMetricData,
-)
+from experiment_analysis.data_models.ratio_metric_data import RatioMetricData
 from experiment_analysis.stats.bootstrap import Bootstrap
 from experiment_analysis.stats.randomization import Randomization
 from experiment_analysis.stats.zstatistic import ZStatistic
 
 
 class RatioMetricInference:
-    def __init__(self, data: AdditiveMetricData) -> None:
+    def __init__(self, data: RatioMetricData) -> None:
         self._data = data.data
 
         self._treatment_effect = None
@@ -71,8 +70,10 @@ class RatioMetricInference:
             return self._get_p_value_randomization(*args, **kwargs)
         elif method == BOOTSTRAP:
             return self._get_p_value_bootstrap(*args, **kwargs)
-        elif method == ZTEST:
-            return self._get_p_value_z_test(*args, **kwargs)
+        elif method == DELTA:
+            raise NotImplementedError
+        elif method == FIELLER:
+            raise NotImplementedError
         else:
             raise NotImplementedError
 

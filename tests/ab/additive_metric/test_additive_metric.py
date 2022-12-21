@@ -17,10 +17,6 @@ def generate_test_data(
     std: float,
     control_proportion: float = 0.5,
 ) -> AdditiveMetricData:
-    # generate experiment data corresponding to specified treatment effect and variance
-    # if variance is zero, then we get constant treatment effect
-    # if variance is non-zero, then we get average treatment effect
-    # 1/5 control, 4/5 treatment
     # TODO: figure out how to do this as a pytest.fixture
 
     control_num_units = int(num_units * control_proportion)
@@ -91,6 +87,7 @@ def assert_p_values_under_null(
 
     # fpr should be around 5%
     fpr = np.where(p_values < 0.05, 1, 0).mean()
+    print(f"fpr under method {method} is {fpr}")
     assert 0.04 < fpr < 0.06
 
     # p values should be uniformly distributed
@@ -150,6 +147,7 @@ def assert_p_values_under_alternative(
 
     # fraction of significance findings should be around 0.8
     detection_rate = np.where(p_values < 0.05, 1, 0).mean()
+    print(f"detection rate under method {method} is {detection_rate}")
     assert 0.75 < detection_rate < 0.85
 
 

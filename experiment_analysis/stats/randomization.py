@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -10,43 +10,38 @@ class Randomization:
     for speed, operations are limited to numpy arrays
     """
 
-    @classmethod
-    def get_simple_random_assignment(
-        cls, size: int, control_proportion: float
-    ) -> NDArray[np.int64]:
+    def __init__(self, data: NDArray[np.float64]) -> None:
+        self._randomized_data = data.copy()
+        self.size = len(data)
+        self.control_proportion = 1 - data[:, -1].mean()
+
+    def get_simple_random_assignment(self) -> NDArray[np.int64]:
         # returns a numpy array of integers, with values of 0, 1
         # value of 0 corresponds to "control" and value of 1 corresponds to "treatment"
-        rv = np.random.uniform(low=0, high=1, size=size)
-        random_assignment = np.where(rv < control_proportion, 0, 1)
+        rv = np.random.uniform(low=0, high=1, size=self.size)
+        random_assignment = np.where(rv < self.control_proportion, 0, 1)
         return random_assignment
 
-    @classmethod
-    def get_simple_random_assignment_estimates(
-        cls,
-        metric: NDArray[np.float64],
-        estimation_func: Callable[[Any], float],
-        control_proportion: float,
+    def get_simple_randomized_assignment_data(self) -> NDArray[np.int64]:
+        self._randomized_data[:, -1] = self.get_simple_random_assignment()
+        return self._randomized_data  # type: ignore
+
+    def get_simple_randomized_assignment_estimates(
+        self,
+        estimation_func: Callable[[NDArray[np.float64]], float],
         num_randomizations: int,
     ) -> NDArray[np.float64]:
-
-        size = len(metric)
 
         estimates = np.zeros(num_randomizations)
 
         for i in range(num_randomizations):
-            random_assignment = cls.get_simple_random_assignment(
-                size, control_proportion
+            randomized_assignment_data = (
+                self.get_simple_randomized_assignment_data()
             )
-            estimate = estimation_func(metric, random_assignment)  # type: ignore
+            estimate = estimation_func(randomized_assignment_data)  # type: ignore
             estimates[i] = estimate
 
         return estimates
-
-    @classmethod
-    def get_cluster_random_assignment(cls) -> NDArray[np.float64]:
-        # randomize assignment status at the level of clusters instead of at the level of units
-        # need a cluster identifier in the data
-        pass
 
     @classmethod
     def get_p_value(

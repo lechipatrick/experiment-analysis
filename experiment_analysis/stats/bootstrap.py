@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Callable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -12,32 +12,27 @@ class Bootstrap:
     for speed, operations are limited to numpy arrays
     """
 
-    @classmethod
-    def get_simple_bootstrap_data(
-        cls, data: NDArray[np.float64], size: int
-    ) -> NDArray[np.float64]:
-        # data should be array of shape (n, 2) with the first column being metric, and second column being
+    def __init__(self, data: NDArray[np.float64]):
+        # data should be array of shape (n, k) with the first k-1 columns being metrics, and the last column being
         # assignment
-        # size is the number of observations to draw. usually set to len(data)
-        indices = np.random.choice(a=size, size=size, replace=True)
-        return data[indices]  # type: ignore
+        self.data = data.copy()
+        self.size = len(data)
 
-    @classmethod
-    def get_simple_bootstrap_estimates(
-        cls,
-        data: NDArray[np.float64],
-        estimation_func: Callable[[Any], Any],
+    def get_simple_bootstrap_data(self) -> NDArray[np.float64]:
+        indices = np.random.choice(a=self.size, size=self.size, replace=True)
+        return self.data[indices]  # type: ignore
+
+    def get_bootstrap_estimates(
+        self,
+        estimation_func: Callable[[NDArray[np.float64]], float],
         num_bootstraps: int,
     ) -> NDArray[np.float64]:
-
-        size = len(data)
 
         estimates = np.zeros(num_bootstraps)
 
         for i in range(num_bootstraps):
-            bootstrap_data = cls.get_simple_bootstrap_data(data, size)
-            metric, assignment = bootstrap_data[:, 0], bootstrap_data[:, 1]
-            estimate = estimation_func(metric, assignment)  # type: ignore
+            bootstrap_data = self.get_simple_bootstrap_data()
+            estimate = estimation_func(bootstrap_data)
             estimates[i] = estimate
 
         return estimates
