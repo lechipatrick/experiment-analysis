@@ -10,7 +10,8 @@ class Randomization:
     for speed, operations are limited to numpy arrays
     """
 
-    def __init__(self, data: NDArray[np.float64]) -> None:
+    def __init__(self, data: NDArray[np.float64], num_randomizations: int) -> None:
+        self.num_randomizations = num_randomizations
         self._randomized_data = data.copy()
         self.size = len(data)
         self.control_proportion = 1 - data[:, -1].mean()
@@ -29,12 +30,11 @@ class Randomization:
     def get_simple_randomized_assignment_estimates(
         self,
         estimation_func: Callable[[NDArray[np.float64]], float],
-        num_randomizations: int,
     ) -> NDArray[np.float64]:
 
-        estimates = np.zeros(num_randomizations)
+        estimates = np.zeros(self.num_randomizations)
 
-        for i in range(num_randomizations):
+        for i in range(self.num_randomizations):
             randomized_assignment_data = (
                 self.get_simple_randomized_assignment_data()
             )
