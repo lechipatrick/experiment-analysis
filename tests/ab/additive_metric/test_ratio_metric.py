@@ -128,7 +128,7 @@ def test_p_value_distribution_under_null_randomization() -> None:
     assert_p_value_distribution_under_null(
         method="randomization",
         num_units=1000,
-        num_sims=1000,
+        num_sims=2000,
         num_randomizations=1000,
     )
 
@@ -138,7 +138,7 @@ def test_p_value_distribution_under_null_bootstrap() -> None:
     assert_p_value_distribution_under_null(
         method="bootstrap",
         num_units=1000,
-        num_sims=1000,
+        num_sims=2000,
         num_bootstraps=1000,
     )
 
@@ -174,7 +174,7 @@ def assert_p_value_distribution_under_alternative(
 @pytest.mark.power
 def test_p_value_distribution_randomization_under_alternative() -> None:
     assert_p_value_distribution_under_alternative(
-        method="randomization", num_sims=1000, num_randomizations=1000
+        method="randomization", num_sims=2000, num_randomizations=1000
     )
 
 
@@ -184,5 +184,5 @@ def test_p_value_distribution_randomization_under_alternative() -> None:
 @pytest.mark.power
 def test_p_value_distribution_bootstrap_under_alternative() -> None:
     assert_p_value_distribution_under_alternative(
-        method="bootstrap", num_sims=1000, num_bootstraps=1000
+        method="bootstrap", num_sims=2000, num_bootstraps=1000
     )
