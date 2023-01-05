@@ -54,25 +54,22 @@ def test_p_value_when_treatment_effect_large() -> None:
     test_data = generate_test_data(num_units=1000, treatment_effect=1, std=0.1)
     inference = AdditiveMetricInference(test_data)
     assert inference.get_p_value(method="ztest") < 0.01
-    assert (
-        inference.get_p_value(method="randomization", num_randomizations=1000)
-        < 0.01
-    )
-    assert (
-        inference.get_p_value(method="bootstrap", num_bootstraps=1000) < 0.01
-    )
+    assert inference.get_p_value(method="randomization") < 0.01
+    assert inference.get_p_value(method="bootstrap") < 0.01
 
 
 def assert_p_value_distribution_under_null(
-    method: str, num_units: int, num_sims: int, *args: int, **kwargs: int
+    method: str, num_units: int, num_sims: int
 ) -> None:
     p_values = np.zeros(num_sims)
     for i in tqdm(range(num_sims)):
         test_data = generate_test_data(
             num_units=num_units, treatment_effect=0, std=1
         )
-        inference = AdditiveMetricInference(test_data)
-        p_value = inference.get_p_value(method, *args, **kwargs)
+        inference = AdditiveMetricInference(
+            test_data, num_bootstraps=1000, num_randomizations=1000
+        )
+        p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
     # fpr should be around 5%
@@ -107,7 +104,6 @@ def test_p_value_distribution_under_null_randomization() -> None:
         method="randomization",
         num_units=1000,
         num_sims=2000,
-        num_randomizations=1000,
     )
 
 
@@ -117,13 +113,10 @@ def test_p_value_distribution_under_null_bootstrap() -> None:
         method="bootstrap",
         num_units=1000,
         num_sims=2000,
-        num_bootstraps=1000,
     )
 
 
-def assert_p_values_under_alternative(
-    method: str, num_sims: int, *args: int, **kwargs: int
-) -> None:
+def assert_p_values_under_alternative(method: str, num_sims: int) -> None:
     p_values = np.zeros(num_sims)
     for i in tqdm(range(num_sims)):
         # this test_data should give 80% power at 5% size
@@ -133,8 +126,10 @@ def assert_p_values_under_alternative(
             std=10,
             control_proportion=0.5,
         )
-        inference = AdditiveMetricInference(test_data)
-        p_value = inference.get_p_value(method, *args, **kwargs)
+        inference = AdditiveMetricInference(
+            test_data, num_bootstraps=1000, num_randomizations=1000
+        )
+        p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
     # fraction of significance findings should be around 0.8
@@ -150,13 +145,42 @@ def test_p_value_distribution_z_test_under_alternative() -> None:
 
 @pytest.mark.power
 def test_p_value_distribution_randomization_under_alternative() -> None:
-    assert_p_values_under_alternative(
-        method="randomization", num_sims=2000, num_randomizations=1000
-    )
+    assert_p_values_under_alternative(method="randomization", num_sims=2000)
 
 
 @pytest.mark.power
 def test_p_value_distribution_bootstrap_under_alternative() -> None:
-    assert_p_values_under_alternative(
-        method="bootstrap", num_sims=2000, num_bootstraps=1000
+    assert_p_values_under_alternative(method="bootstrap", num_sims=2000)
+
+
+def assert_confidence_interval_coverage(
+    method: str, num_units: int, num_sims: int
+) -> None:
+    covered = 0
+    for i in tqdm(range(num_sims)):
+        treatment_efffect = np.random.normal(0, 10)
+        test_data = generate_test_data(
+            num_units=num_units, treatment_effect=treatment_efffect, std=1
+        )
+        inference = AdditiveMetricInference(
+            test_data, num_bootstraps=1000, num_randomizations=1000
+        )
+        lower, upper = inference.get_confidence_interval(
+            level=0.95, method=method
+        )
+        if lower < treatment_efffect < upper:
+            covered += 1
+    # fpr should be around 5%
+    coverage = covered / num_sims
+    print(f"coverage under method {method} is {coverage}")
+    assert 0.925 < coverage < 0.975
+
+
+def test_confidence_interval_coverage_z_test() -> None:
+    assert_confidence_interval_coverage("ztest", num_units=1000, num_sims=1000)
+
+
+def test_confidence_interval_coverage_bootstrap() -> None:
+    assert_confidence_interval_coverage(
+        "bootstrap", num_units=1000, num_sims=1000
     )

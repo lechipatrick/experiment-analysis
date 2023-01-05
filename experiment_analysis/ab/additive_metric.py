@@ -1,4 +1,5 @@
 from typing import Tuple
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -16,10 +17,18 @@ from experiment_analysis.data_models.additive_metric_data import (
 from experiment_analysis.stats.bootstrap import Bootstrap
 from experiment_analysis.stats.randomization import Randomization
 from experiment_analysis.stats.zstatistic import ZStatistic
+from experiment_analysis.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class AdditiveMetricInference:
-    def __init__(self, data: AdditiveMetricData, num_bootstraps: int=10000, num_randomizations: int = 10000) -> None:
+    def __init__(
+        self,
+        data: AdditiveMetricData,
+        num_bootstraps: int = 10000,
+        num_randomizations: int = 10000,
+    ) -> None:
         self.additive_metric_data: AdditiveMetricData = data
         self.num_bootstraps = num_bootstraps
         self.num_randomizations = num_randomizations
@@ -86,6 +95,9 @@ class AdditiveMetricInference:
             raise NotImplementedError
 
     def _get_p_value_randomization(self) -> float:
+        logger.info(
+            f"using number of randomizations {self.num_randomizations}"
+        )
         randomization_estimator = Randomization(
             self.data, self.estimate_treatment_effect, self.num_randomizations
         )
@@ -100,7 +112,7 @@ class AdditiveMetricInference:
         return ZStatistic.get_p_value(self.treatment_effect, self.se_z_test)
 
     @property
-    def se_z_test(self):
+    def se_z_test(self) -> float:
         if self._se_z_test is None:
 
             # relies on CLT, assuming no outliers
@@ -111,24 +123,25 @@ class AdditiveMetricInference:
                 control.var() / len(control) + treatment.var() / len(treatment)
             )
             self._se_z_test = se
-        return self._se_z_test
+        return self._se_z_test  # type: ignore
 
     @property
-    def se_bootstrap(self):
+    def se_bootstrap(self) -> float:
         if self._se_bootstrap is None:
+            logger.info(f"using number of bootstraps {self.num_bootstraps}")
             bootstrapper = Bootstrap(
                 self.data, self.estimate_treatment_effect, self.num_bootstraps
             )
             bootstrap_estimates = bootstrapper.get_bootstrap_estimates()
             se = bootstrap_estimates.std()
             self._se_bootstrap = se
-        return self._se_bootstrap
+        return self._se_bootstrap  # type: ignore
 
     def _get_p_value_bootstrap(self) -> float:
         return ZStatistic.get_p_value(self.treatment_effect, self.se_bootstrap)
 
     def get_confidence_interval(
-        self, level: float, method: str, *args: int, **kwargs: int
+        self, level: float, method: str
     ) -> Tuple[float, float]:
         try:
             assert 0 <= level <= 1
@@ -142,45 +155,4 @@ class AdditiveMetricInference:
         else:
             raise NotImplementedError
 
-        critical_threshold = ZStatistic.get_critical_value(level)
-
-        return self.treatment_effect - critical_threshold * se, self.treatment_effect + critical_threshold * se
-
-import pandas as pd
-def generate_test_data(
-    num_units: int,
-    treatment_effect: float,
-    std: float,
-    control_proportion: float = 0.5,
-) -> AdditiveMetricData:
-    # TODO: figure out how to do this as a pytest.fixture
-
-    control_num_units = int(num_units * control_proportion)
-    treatment_num_units = int(num_units * (1 - control_proportion))
-
-    variation_control = ["control" for _ in range(control_num_units)]
-    variation_treatment = ["treatment" for _ in range(treatment_num_units)]
-
-    metric_control = np.random.normal(loc=0, scale=std, size=control_num_units)
-    metric_treatment = np.random.normal(
-        loc=treatment_effect, scale=std, size=treatment_num_units
-    )
-
-    data = {
-        METRIC: np.hstack((metric_control, metric_treatment)),
-        VARIATION: variation_control + variation_treatment,
-    }
-    df = pd.DataFrame.from_dict(data)
-    return AdditiveMetricData(data=df)
-
-num_units = 1000
-num_sims = 1000
-treatment_effect = 0
-test_data = generate_test_data(num_units, treatment_effect, 1)
-inf = AdditiveMetricInference(test_data, num_bootstraps=1000, num_randomizations=1000)
-print(inf.treatment_effect)
-print(inf.get_p_value("ztest"))
-print(inf.get_p_value("bootstrap"))
-print(inf.get_p_value("randomization"))
-
-print(inf.get_confidence_interval(0.95, "bootstrap"))
+        return ZStatistic.get_interval(self.treatment_effect, level, se)
