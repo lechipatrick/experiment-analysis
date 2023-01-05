@@ -77,12 +77,11 @@ class AdditiveMetricInference:
             raise NotImplementedError
 
     def _get_p_value_randomization(self, num_randomizations: int) -> float:
-        randomization_estimator = Randomization(self.data)
+        randomization_estimator = Randomization(
+            self.data, self.estimate_treatment_effect, num_randomizations
+        )
         randomization_estimates = (
-            randomization_estimator.get_simple_randomized_assignment_estimates(
-                estimation_func=self.estimate_treatment_effect,
-                num_randomizations=num_randomizations,
-            )
+            randomization_estimator.get_randomized_assignment_estimates()
         )
         return randomization_estimator.get_p_value(
             self.treatment_effect, randomization_estimates
@@ -99,11 +98,10 @@ class AdditiveMetricInference:
         return ZStatistic.get_p_value(self.treatment_effect, se)
 
     def _get_p_value_bootstrap(self, num_bootstraps: int) -> float:
-        bootstrapper = Bootstrap(self.data)
-        bootstrap_estimates = bootstrapper.get_bootstrap_estimates(
-            self.estimate_treatment_effect,
-            num_bootstraps,
+        bootstrapper = Bootstrap(
+            self.data, self.estimate_treatment_effect, num_bootstraps
         )
+        bootstrap_estimates = bootstrapper.get_bootstrap_estimates()
         return bootstrapper.get_p_value(
             self.treatment_effect, bootstrap_estimates
         )

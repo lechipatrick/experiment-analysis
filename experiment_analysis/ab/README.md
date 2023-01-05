@@ -53,7 +53,7 @@ The ratio metric for a group $G$ is defined as $r_G = \frac{\sum_{i \in G} x_i}{
 
 Treatment effect is defined as the difference between (1) the ratio metric in the scenario where every unit is assigned to treatment, and (2) the ratio metric where every unit is assigned to control. We are generally interested in whether the treatment effect is non-zero.
 
-Common examples of ratio metric: click thru rate (numerator = click, denominator = impression), purchase rate conditional on add to cart (numerator = purchase or not, denominator = add to cart or not), etc.
+Common examples of ratio metric: click thru rate (numerator = click, denominator = impression), purchase rate conditional on add to cart (numerator = purchase or not, denominator = add to cart or not), amount of the tip over the total amount of the order, etc.
 
 ### randomization
 Same as randomization for additive metric.
