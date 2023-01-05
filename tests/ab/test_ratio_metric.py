@@ -71,7 +71,7 @@ def test_assignment() -> None:
 def test_p_value_when_treatment_effect_large() -> None:
     test_data = generate_test_data(num_units=1000, treatment_effect=10)
     inference = RatioMetricInference(test_data)
-    # assert inference.get_p_value(method="delta") < 0.01
+    assert inference.get_p_value(method="delta") < 0.01
     assert (
         inference.get_p_value(method="randomization", num_randomizations=1000)
         < 0.01
@@ -86,7 +86,11 @@ def assert_p_value_distribution_under_null(
 ) -> None:
     p_values = np.zeros(num_sims)
     for i in tqdm(range(num_sims)):
-        test_data = generate_test_data(num_units=num_units, treatment_effect=0)
+        test_data = generate_test_data(
+            num_units=num_units,
+            treatment_effect=0,
+            cov=np.array([[1, 0.5], [0.5, 1]]),
+        )
         inference = RatioMetricInference(test_data)
         p_value = inference.get_p_value(method, *args, **kwargs)
         p_values[i] = p_value
@@ -114,13 +118,15 @@ def assert_p_value_distribution_under_null(
     try:
         assert p > 0.05
     except Exception as exc:
-        print("p_values are not uniformly distribution")
+        print("p_values are not uniformly distributed")
         raise exc
 
 
-# @pytest.mark.fpr
-# def test_p_value_distribution_z_test_under_null() -> None:
-#     assert_p_value_distribution_under_null(method="delta", num_units=1000, num_sims=10000)
+@pytest.mark.fpr
+def test_p_value_distribution_under_null_delta() -> None:
+    assert_p_value_distribution_under_null(
+        method="delta", num_units=1000, num_sims=10000
+    )
 
 
 @pytest.mark.fpr
@@ -164,25 +170,22 @@ def assert_p_value_distribution_under_alternative(
     assert 0.7 < detection_rate < 0.9
 
 
-#
-#
-# # @pytest.mark.power
-# # def test_p_value_distribution_z_test_under_alternative() -> None:
-# #     assert_p_values_under_alternative(method="delta", num_sims=1000)
-#
-#
 @pytest.mark.power
-def test_p_value_distribution_randomization_under_alternative() -> None:
+def test_p_value_distribution_under_alternative_delta() -> None:
+    assert_p_value_distribution_under_alternative(
+        method="delta", num_sims=1000
+    )
+
+
+@pytest.mark.power
+def test_p_value_distribution_under_alternative_randomization() -> None:
     assert_p_value_distribution_under_alternative(
         method="randomization", num_sims=2000, num_randomizations=1000
     )
 
 
-#
-
-
 @pytest.mark.power
-def test_p_value_distribution_bootstrap_under_alternative() -> None:
+def test_p_value_distribution_under_alternative_bootstrap() -> None:
     assert_p_value_distribution_under_alternative(
         method="bootstrap", num_sims=2000, num_bootstraps=1000
     )

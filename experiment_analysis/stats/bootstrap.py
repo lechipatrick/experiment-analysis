@@ -12,28 +12,32 @@ class Bootstrap:
     for speed, operations are limited to numpy arrays
     """
 
-    def __init__(self, data: NDArray[np.float64], num_bootstraps: int):
+    def __init__(
+        self,
+        data: NDArray[np.float64],
+        estimation_func: Callable[[NDArray[np.float64]], float],
+        num_bootstraps: int,
+    ):
         # data should be array of shape (n, k) with the first k-1 columns being metrics, and the last column being
         # assignment
         self.data = data.copy()
+        self.estimation_func = estimation_func
         self.num_bootstraps = num_bootstraps
         self.size = len(data)
 
-
-    def get_simple_bootstrap_data(self) -> NDArray[np.float64]:
+    def get_bootstrap_data(self) -> NDArray[np.float64]:
         indices = np.random.choice(a=self.size, size=self.size, replace=True)
         return self.data[indices]  # type: ignore
 
     def get_bootstrap_estimates(
         self,
-        estimation_func: Callable[[NDArray[np.float64]], float],
     ) -> NDArray[np.float64]:
 
         estimates = np.zeros(self.num_bootstraps)
 
         for i in range(self.num_bootstraps):
-            bootstrap_data = self.get_simple_bootstrap_data()
-            estimate = estimation_func(bootstrap_data)
+            bootstrap_data = self.get_bootstrap_data()
+            estimate = self.estimation_func(bootstrap_data)
             estimates[i] = estimate
 
         return estimates
