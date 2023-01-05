@@ -1,4 +1,3 @@
-from typing import Any
 import logging
 import sys
 
@@ -7,7 +6,7 @@ FORMATTER = logging.Formatter(
 )
 
 
-def get_console_handler() -> logging.StreamHandler[Any]:
+def get_console_handler() -> logging.StreamHandler:  # type: ignore
     console_handler = logging.StreamHandler(sys.stderr)
     console_handler.setFormatter(FORMATTER)
     return console_handler

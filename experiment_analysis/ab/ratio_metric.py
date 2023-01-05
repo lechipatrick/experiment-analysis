@@ -25,20 +25,10 @@ class RatioMetricInference(AdditiveMetricInference):
         num_bootstraps: int = 10000,
         num_randomizations: int = 10000,
     ) -> None:
-        self.ratio_metric_data: RatioMetricData = data
-        self.num_bootstraps = num_bootstraps
-        self.num_randomizations = num_randomizations
-
-        self._data = None
-        self._treatment_effect = None
-        self._metric = None
-        self._assignment = None
+        super().__init__(data, num_bootstraps, num_randomizations)
 
         self._se_delta_method = None
-        self._se_bootstrap = None
-
         self._ci_delta_method = None
-        self._ci_bootstrap = None
 
     @property
     def data(self) -> NDArray[np.float64]:
@@ -55,13 +45,13 @@ class RatioMetricInference(AdditiveMetricInference):
     @property
     def metric(self) -> NDArray[np.float64]:
         if self._metric is None:
-            self._metric = np.array(self.ratio_metric_data.data[[METRIC_NUMERATOR, METRIC_DENOMINATOR]])  # type: ignore
+            self._metric = np.array(self.metric_data.data[[METRIC_NUMERATOR, METRIC_DENOMINATOR]])  # type: ignore
         return self._metric  # type: ignore
 
     @property
     def assignment(self) -> NDArray[np.float64]:
         if self._assignment is None:
-            variation = np.array(self.ratio_metric_data.data[VARIATION])
+            variation = np.array(self.metric_data.data[VARIATION])
             self._assignment = np.where(variation == TREATMENT, 1, 0)  # type: ignore
         return self._assignment  # type: ignore
 

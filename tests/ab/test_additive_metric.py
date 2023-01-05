@@ -157,7 +157,7 @@ def assert_confidence_interval_coverage(
     method: str, num_units: int, num_sims: int
 ) -> None:
     covered = 0
-    for i in tqdm(range(num_sims)):
+    for _ in tqdm(range(num_sims)):
         treatment_efffect = np.random.normal(0, 10)
         test_data = generate_test_data(
             num_units=num_units, treatment_effect=treatment_efffect, std=1

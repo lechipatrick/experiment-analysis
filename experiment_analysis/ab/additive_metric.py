@@ -29,7 +29,7 @@ class AdditiveMetricInference:
         num_bootstraps: int = 10000,
         num_randomizations: int = 10000,
     ) -> None:
-        self.additive_metric_data: AdditiveMetricData = data
+        self.metric_data: AdditiveMetricData = data
         self.num_bootstraps = num_bootstraps
         self.num_randomizations = num_randomizations
 
@@ -58,13 +58,13 @@ class AdditiveMetricInference:
     @property
     def metric(self) -> NDArray[np.float64]:
         if self._metric is None:
-            self._metric = np.array(self.additive_metric_data.data[METRIC])  # type: ignore
+            self._metric = np.array(self.metric_data.data[METRIC])  # type: ignore
         return self._metric  # type: ignore
 
     @property
     def assignment(self) -> NDArray[np.float64]:
         if self._assignment is None:
-            variation = np.array(self.additive_metric_data.data[VARIATION])
+            variation = np.array(self.metric_data.data[VARIATION])
             self._assignment = np.where(variation == TREATMENT, 1, 0)  # type: ignore
         return self._assignment  # type: ignore
 
