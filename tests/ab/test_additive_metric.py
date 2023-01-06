@@ -91,14 +91,13 @@ def assert_p_value_distribution_under_null(
     assert p > 0.05
 
 
-@pytest.mark.fpr
 def test_p_value_distribution_under_null_ztest() -> None:
     assert_p_value_distribution_under_null(
         method="ztest", num_units=1000, num_sims=10000
     )
 
 
-@pytest.mark.fpr
+@pytest.mark.slow
 def test_p_value_distribution_under_null_randomization() -> None:
     assert_p_value_distribution_under_null(
         method="randomization",
@@ -107,7 +106,7 @@ def test_p_value_distribution_under_null_randomization() -> None:
     )
 
 
-@pytest.mark.fpr
+@pytest.mark.slow
 def test_p_value_distribution_under_null_bootstrap() -> None:
     assert_p_value_distribution_under_null(
         method="bootstrap",
@@ -138,17 +137,16 @@ def assert_p_values_under_alternative(method: str, num_sims: int) -> None:
     assert 0.7 < detection_rate < 0.9
 
 
-@pytest.mark.power
 def test_p_value_distribution_z_test_under_alternative() -> None:
     assert_p_values_under_alternative(method="ztest", num_sims=10000)
 
 
-@pytest.mark.power
+@pytest.mark.slow
 def test_p_value_distribution_randomization_under_alternative() -> None:
     assert_p_values_under_alternative(method="randomization", num_sims=2000)
 
 
-@pytest.mark.power
+@pytest.mark.slow
 def test_p_value_distribution_bootstrap_under_alternative() -> None:
     assert_p_values_under_alternative(method="bootstrap", num_sims=2000)
 
@@ -179,7 +177,7 @@ def assert_confidence_interval_coverage(
 def test_confidence_interval_coverage_z_test() -> None:
     assert_confidence_interval_coverage("ztest", num_units=1000, num_sims=1000)
 
-
+@pytest.mark.slow
 def test_confidence_interval_coverage_bootstrap() -> None:
     assert_confidence_interval_coverage(
         "bootstrap", num_units=1000, num_sims=1000
