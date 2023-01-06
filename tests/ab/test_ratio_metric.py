@@ -119,7 +119,7 @@ def assert_p_value_distribution_under_null(
 
 def test_p_value_distribution_under_null_delta() -> None:
     assert_p_value_distribution_under_null(
-        method="delta", num_units=1000, num_sims=1000
+        method="delta", num_units=1000, num_sims=5000
     )
 
 @pytest.mark.slow
