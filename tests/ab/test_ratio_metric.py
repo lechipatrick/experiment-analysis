@@ -72,17 +72,12 @@ def test_p_value_when_treatment_effect_large() -> None:
     test_data = generate_test_data(num_units=1000, treatment_effect=10)
     inference = RatioMetricInference(test_data)
     assert inference.get_p_value(method="delta") < 0.01
-    assert (
-        inference.get_p_value(method="randomization", num_randomizations=1000)
-        < 0.01
-    )
-    assert (
-        inference.get_p_value(method="bootstrap", num_bootstraps=1000) < 0.01
-    )
+    assert inference.get_p_value(method="randomization") < 0.01
+    assert inference.get_p_value(method="bootstrap") < 0.01
 
 
 def assert_p_value_distribution_under_null(
-    method: str, num_units: int, num_sims: int, *args: int, **kwargs: int
+    method: str, num_units: int, num_sims: int
 ) -> None:
     p_values = np.zeros(num_sims)
     for i in tqdm(range(num_sims)):
@@ -92,7 +87,7 @@ def assert_p_value_distribution_under_null(
             cov=np.array([[1, 0.5], [0.5, 1]]),
         )
         inference = RatioMetricInference(test_data)
-        p_value = inference.get_p_value(method, *args, **kwargs)
+        p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
     # fpr should be around 5%
@@ -122,35 +117,30 @@ def assert_p_value_distribution_under_null(
         raise exc
 
 
-@pytest.mark.fpr
 def test_p_value_distribution_under_null_delta() -> None:
     assert_p_value_distribution_under_null(
         method="delta", num_units=1000, num_sims=10000
     )
 
-
-@pytest.mark.fpr
+@pytest.mark.slow
 def test_p_value_distribution_under_null_randomization() -> None:
     assert_p_value_distribution_under_null(
         method="randomization",
         num_units=1000,
         num_sims=2000,
-        num_randomizations=1000,
     )
 
-
-@pytest.mark.fpr
+@pytest.mark.slow
 def test_p_value_distribution_under_null_bootstrap() -> None:
     assert_p_value_distribution_under_null(
         method="bootstrap",
         num_units=1000,
         num_sims=2000,
-        num_bootstraps=1000,
     )
 
 
 def assert_p_value_distribution_under_alternative(
-    method: str, num_sims: int, *args: int, **kwargs: int
+    method: str, num_sims: int
 ) -> None:
     p_values = np.zeros(num_sims)
     for i in tqdm(range(num_sims)):
@@ -161,7 +151,7 @@ def assert_p_value_distribution_under_alternative(
             control_proportion=0.5,
         )
         inference = RatioMetricInference(test_data)
-        p_value = inference.get_p_value(method, *args, **kwargs)
+        p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
     # fraction of significance findings should be around 0.8
@@ -170,22 +160,54 @@ def assert_p_value_distribution_under_alternative(
     assert 0.7 < detection_rate < 0.9
 
 
-@pytest.mark.power
 def test_p_value_distribution_under_alternative_delta() -> None:
     assert_p_value_distribution_under_alternative(
         method="delta", num_sims=1000
     )
 
-
-@pytest.mark.power
+@pytest.mark.slow
 def test_p_value_distribution_under_alternative_randomization() -> None:
     assert_p_value_distribution_under_alternative(
-        method="randomization", num_sims=2000, num_randomizations=1000
+        method="randomization", num_sims=2000
+    )
+
+@pytest.mark.slow
+def test_p_value_distribution_under_alternative_bootstrap() -> None:
+    assert_p_value_distribution_under_alternative(
+        method="bootstrap", num_sims=2000
     )
 
 
-@pytest.mark.power
-def test_p_value_distribution_under_alternative_bootstrap() -> None:
-    assert_p_value_distribution_under_alternative(
-        method="bootstrap", num_sims=2000, num_bootstraps=1000
+def assert_confidence_interval_coverage(
+    method: str, num_units: int, num_sims: int
+) -> None:
+    covered = 0
+    for _ in tqdm(range(num_sims)):
+        treatment_efffect = np.random.normal(0, 10)
+        test_data = generate_test_data(
+            num_units=num_units,
+            treatment_effect=treatment_efffect,
+            cov=np.array([[1, 0.5], [0.5, 1]]),
+        )
+        inference = RatioMetricInference(
+            test_data, num_bootstraps=1000, num_randomizations=1000
+        )
+        lower, upper = inference.get_confidence_interval(
+            level=0.95, method=method
+        )
+        if lower < treatment_efffect < upper:
+            covered += 1
+    # fpr should be around 5%
+    coverage = covered / num_sims
+    print(f"coverage under method {method} is {coverage}")
+    assert 0.925 < coverage < 0.975
+
+
+def test_confidence_interval_coverage_z_test() -> None:
+    assert_confidence_interval_coverage("delta", num_units=1000, num_sims=1000)
+
+@pytest.mark.slow
+def test_confidence_interval_coverage_bootstrap() -> None:
+    assert_confidence_interval_coverage(
+        "bootstrap", num_units=1000, num_sims=1000
     )
