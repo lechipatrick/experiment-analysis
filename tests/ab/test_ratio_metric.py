@@ -71,6 +71,8 @@ def test_assignment() -> None:
 def test_p_value_when_treatment_effect_large() -> None:
     test_data = generate_test_data(num_units=1000, treatment_effect=10)
     inference = RatioMetricInference(test_data)
+    inference.set_num_bootstraps(10000)
+    inference.set_num_randomizations(10000)
     assert inference.get_p_value(method="delta") < 0.01
     assert inference.get_p_value(method="randomization") < 0.01
     assert inference.get_p_value(method="bootstrap") < 0.01
@@ -87,8 +89,10 @@ def assert_p_value_distribution_under_null(
             cov=np.array([[1, 0.5], [0.5, 1]]),
         )
         inference = RatioMetricInference(
-            test_data, num_bootstraps=1000, num_randomizations=1000
+            test_data
         )
+        inference.set_num_bootstraps(1000)
+        inference.set_num_randomizations(1000)
         p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
@@ -155,8 +159,10 @@ def assert_p_value_distribution_under_alternative(
             control_proportion=0.5,
         )
         inference = RatioMetricInference(
-            test_data, num_bootstraps=1000, num_randomizations=1000
+            test_data
         )
+        inference.set_num_bootstraps(1000)
+        inference.set_num_randomizations(1000)
         p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
@@ -198,8 +204,10 @@ def assert_confidence_interval_coverage(
             cov=np.array([[1, 0.5], [0.5, 1]]),
         )
         inference = RatioMetricInference(
-            test_data, num_bootstraps=1000, num_randomizations=1000
+            test_data
         )
+        inference.set_num_bootstraps(1000)
+        inference.set_num_randomizations(1000)
         lower, upper = inference.get_confidence_interval(
             level=0.95, method=method
         )
