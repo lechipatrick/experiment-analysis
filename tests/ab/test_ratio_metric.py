@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 from scipy.stats import chisquare
 from tqdm import tqdm
 
-from experiment_analysis.ab.ratio_metric import RatioMetricInference
+from experiment_analysis.ab.ratio_metric_inference import RatioMetricInference
 from experiment_analysis.constants import (
     METRIC_DENOMINATOR,
     METRIC_NUMERATOR,
