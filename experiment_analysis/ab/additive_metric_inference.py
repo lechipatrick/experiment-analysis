@@ -26,12 +26,10 @@ class AdditiveMetricInference:
     def __init__(
         self,
         data: AdditiveMetricData,
-        num_bootstraps: int = 10000,
-        num_randomizations: int = 10000,
     ) -> None:
         self.metric_data: AdditiveMetricData = data
-        self.num_bootstraps = num_bootstraps
-        self.num_randomizations = num_randomizations
+        self._num_randomizations = None
+        self._num_bootstraps = None
 
         self._data = None
         self._treatment_effect = None
@@ -43,6 +41,26 @@ class AdditiveMetricInference:
 
         self._ci_z_test = None
         self._ci_bootstrap = None
+
+1    def set_num_randomizations(self, num_randomizations: int) -> None:
+        self._num_randomizations = num_randomizations
+
+    def set_num_bootstraps(self, num_bootstraps: int) -> None:
+        self._num_bootstraps = num_bootstraps
+
+    @property
+    def num_randomizations(self) -> int:
+        if self._num_randomizations is None:
+            raise ValueError("num_randomizations is not specified. use set_num_randomizations()")
+        else:
+            return self._num_randomizations
+
+    @property
+    def num_bootstraps(self) -> int:
+        if self._num_bootstraps is None:
+            raise ValueError("num_randomizations is not specified. use set_num_randomizations()")
+        else:
+            return self._num_bootstraps
 
     @property
     def data(self) -> NDArray[np.float64]:

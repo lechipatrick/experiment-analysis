@@ -56,7 +56,9 @@ def test_p_value_when_treatment_effect_large() -> None:
     test_data = generate_test_data(num_units=1000, treatment_effect=1, std=0.1)
     inference = AdditiveMetricInference(test_data)
     assert inference.get_p_value(method="ztest") < 0.01
+    inference.set_num_randomizations(10000)
     assert inference.get_p_value(method="randomization") < 0.01
+    inference.set_num_bootstraps(10000)
     assert inference.get_p_value(method="bootstrap") < 0.01
 
 
@@ -69,8 +71,10 @@ def assert_p_value_distribution_under_null(
             num_units=num_units, treatment_effect=0, std=1
         )
         inference = AdditiveMetricInference(
-            test_data, num_bootstraps=1000, num_randomizations=1000
+            test_data
         )
+        inference.set_num_bootstraps(1000)
+        inference.set_num_randomizations(1000)
         p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
@@ -128,8 +132,10 @@ def assert_p_values_under_alternative(method: str, num_sims: int) -> None:
             control_proportion=0.5,
         )
         inference = AdditiveMetricInference(
-            test_data, num_bootstraps=1000, num_randomizations=1000
+            test_data
         )
+        inference.set_num_bootstraps(1000)
+        inference.set_num_randomizations(1000)
         p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
@@ -163,8 +169,10 @@ def assert_confidence_interval_coverage(
             num_units=num_units, treatment_effect=treatment_efffect, std=1
         )
         inference = AdditiveMetricInference(
-            test_data, num_bootstraps=1000, num_randomizations=1000
+            test_data
         )
+        inference.set_num_bootstraps(1000)
+        inference.set_num_randomizations(1000)
         lower, upper = inference.get_confidence_interval(
             level=0.95, method=method
         )
