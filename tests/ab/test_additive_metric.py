@@ -4,7 +4,9 @@ import pytest
 from scipy.stats import chisquare
 from tqdm import tqdm
 
-from experiment_analysis.ab.additive_metric_inference import AdditiveMetricInference
+from experiment_analysis.ab.additive_metric_inference import (
+    AdditiveMetricInference,
+)
 from experiment_analysis.constants import METRIC, VARIATION
 from experiment_analysis.data_models.additive_metric_data import (
     AdditiveMetricData,
@@ -175,6 +177,7 @@ def assert_confidence_interval_coverage(
 
 def test_confidence_interval_coverage_z_test() -> None:
     assert_confidence_interval_coverage("ztest", num_units=1000, num_sims=1000)
+
 
 @pytest.mark.slow
 def test_confidence_interval_coverage_bootstrap() -> None:

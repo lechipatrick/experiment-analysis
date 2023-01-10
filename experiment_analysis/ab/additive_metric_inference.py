@@ -14,14 +14,15 @@ from experiment_analysis.constants import (
 from experiment_analysis.data_models.additive_metric_data import (
     AdditiveMetricData,
 )
+from experiment_analysis.stats.bootstrap import Bootstrap
+from experiment_analysis.stats.randomization import Randomization
 from experiment_analysis.stats.zstatistic import ZStatistic
 from experiment_analysis.utils.log import get_logger
-from experiment_analysis.ab.metric_inference import MetricInference
 
 logger = get_logger(__name__)
 
 
-class AdditiveMetricInference(MetricInference):
+class AdditiveMetricInference:
     def __init__(
         self,
         data: AdditiveMetricData,
@@ -67,6 +68,14 @@ class AdditiveMetricInference(MetricInference):
             self._assignment = np.where(variation == TREATMENT, 1, 0)  # type: ignore
         return self._assignment  # type: ignore
 
+    @property
+    def treatment_effect(self) -> float:
+        if not self._treatment_effect:
+            self._treatment_effect = self.estimate_treatment_effect(
+                self.data
+            )  # type: ignore
+        return self._treatment_effect  # type: ignore
+
     @classmethod
     def estimate_treatment_effect(cls, data: NDArray[np.float64]) -> float:
         metric = data[:, :-1]
@@ -74,6 +83,35 @@ class AdditiveMetricInference(MetricInference):
         control = metric[assignment == 0]
         treatment = metric[assignment == 1]
         return treatment.mean() - control.mean()  # type: ignore
+
+    def get_p_value_bootstrap(self) -> float:
+        return ZStatistic.get_p_value(self.treatment_effect, self.se_bootstrap)
+
+    @property
+    def se_bootstrap(self) -> float:
+        if self._se_bootstrap is None:
+            logger.info(f"using number of bootstraps {self.num_bootstraps}")
+            bootstrapper = Bootstrap(
+                self.data, self.estimate_treatment_effect, self.num_bootstraps
+            )
+            bootstrap_estimates = bootstrapper.get_bootstrap_estimates()
+            se = bootstrap_estimates.std()
+            self._se_bootstrap = se
+        return self._se_bootstrap  # type: ignore
+
+    def get_p_value_randomization(self) -> float:
+        logger.info(
+            f"using number of randomizations {self.num_randomizations}"
+        )
+        randomization_estimator = Randomization(
+            self.data, self.estimate_treatment_effect, self.num_randomizations
+        )
+        randomization_estimates = (
+            randomization_estimator.get_randomized_assignment_estimates()
+        )
+        return randomization_estimator.get_p_value(
+            self.treatment_effect, randomization_estimates
+        )
 
     def get_p_value(self, method: str) -> float:
         if method == RANDOMIZATION:
