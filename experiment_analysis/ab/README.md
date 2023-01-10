@@ -1,6 +1,6 @@
 # User A/B experiments
 
-## Additive metric
+## Additive metric  
 
 There are 3 inference methods: ztest, randomization, and bootstrap. To describe these, we need a bit of notation.
 
