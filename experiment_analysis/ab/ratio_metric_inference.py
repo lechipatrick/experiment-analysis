@@ -3,7 +3,6 @@ from typing import List, Tuple
 import numpy as np
 from numpy.typing import NDArray
 
-from experiment_analysis.ab.metric_inference import MetricInference
 from experiment_analysis.constants import (
     BOOTSTRAP,
     DELTA,
@@ -15,10 +14,15 @@ from experiment_analysis.constants import (
     VARIATION,
 )
 from experiment_analysis.data_models.ratio_metric_data import RatioMetricData
+from experiment_analysis.stats.bootstrap import Bootstrap
+from experiment_analysis.stats.randomization import Randomization
 from experiment_analysis.stats.zstatistic import ZStatistic
+from experiment_analysis.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
-class RatioMetricInference(MetricInference):
+class RatioMetricInference:
     def __init__(
         self,
         data: RatioMetricData,
@@ -64,6 +68,43 @@ class RatioMetricInference(MetricInference):
             variation = np.array(self.metric_data.data[VARIATION])
             self._assignment = np.where(variation == TREATMENT, 1, 0)  # type: ignore
         return self._assignment  # type: ignore
+
+    @property
+    def treatment_effect(self) -> float:
+        if not self._treatment_effect:
+            self._treatment_effect = self.estimate_treatment_effect(
+                self.data
+            )  # type: ignore
+        return self._treatment_effect  # type: ignore
+
+    def get_p_value_randomization(self) -> float:
+        logger.info(
+            f"using number of randomizations {self.num_randomizations}"
+        )
+        randomization_estimator = Randomization(
+            self.data, self.estimate_treatment_effect, self.num_randomizations
+        )
+        randomization_estimates = (
+            randomization_estimator.get_randomized_assignment_estimates()
+        )
+        return randomization_estimator.get_p_value(
+            self.treatment_effect, randomization_estimates
+        )
+
+    @property
+    def se_bootstrap(self) -> float:
+        if self._se_bootstrap is None:
+            logger.info(f"using number of bootstraps {self.num_bootstraps}")
+            bootstrapper = Bootstrap(
+                self.data, self.estimate_treatment_effect, self.num_bootstraps
+            )
+            bootstrap_estimates = bootstrapper.get_bootstrap_estimates()
+            se = bootstrap_estimates.std()
+            self._se_bootstrap = se
+        return self._se_bootstrap  # type: ignore
+
+    def get_p_value_bootstrap(self) -> float:
+        return ZStatistic.get_p_value(self.treatment_effect, self.se_bootstrap)
 
     @classmethod
     def estimate_treatment_effect(cls, data: NDArray[np.float64]) -> float:

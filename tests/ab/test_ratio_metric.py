@@ -86,7 +86,9 @@ def assert_p_value_distribution_under_null(
             treatment_effect=0,
             cov=np.array([[1, 0.5], [0.5, 1]]),
         )
-        inference = RatioMetricInference(test_data, num_bootstraps=1000, num_randomizations=1000)
+        inference = RatioMetricInference(
+            test_data, num_bootstraps=1000, num_randomizations=1000
+        )
         p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
@@ -122,6 +124,7 @@ def test_p_value_distribution_under_null_delta() -> None:
         method="delta", num_units=1000, num_sims=5000
     )
 
+
 @pytest.mark.slow
 def test_p_value_distribution_under_null_randomization() -> None:
     assert_p_value_distribution_under_null(
@@ -129,6 +132,7 @@ def test_p_value_distribution_under_null_randomization() -> None:
         num_units=1000,
         num_sims=1000,
     )
+
 
 @pytest.mark.slow
 def test_p_value_distribution_under_null_bootstrap() -> None:
@@ -150,7 +154,9 @@ def assert_p_value_distribution_under_alternative(
             treatment_effect=0.1,
             control_proportion=0.5,
         )
-        inference = RatioMetricInference(test_data, num_bootstraps=1000, num_randomizations=1000)
+        inference = RatioMetricInference(
+            test_data, num_bootstraps=1000, num_randomizations=1000
+        )
         p_value = inference.get_p_value(method)
         p_values[i] = p_value
 
@@ -165,11 +171,13 @@ def test_p_value_distribution_under_alternative_delta() -> None:
         method="delta", num_sims=1000
     )
 
+
 @pytest.mark.slow
 def test_p_value_distribution_under_alternative_randomization() -> None:
     assert_p_value_distribution_under_alternative(
         method="randomization", num_sims=1000
     )
+
 
 @pytest.mark.slow
 def test_p_value_distribution_under_alternative_bootstrap() -> None:
@@ -204,6 +212,7 @@ def assert_confidence_interval_coverage(
 
 def test_confidence_interval_coverage_z_test() -> None:
     assert_confidence_interval_coverage("delta", num_units=1000, num_sims=1000)
+
 
 @pytest.mark.slow
 def test_confidence_interval_coverage_bootstrap() -> None:
