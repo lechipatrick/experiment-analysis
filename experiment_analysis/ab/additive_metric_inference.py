@@ -77,15 +77,15 @@ class AdditiveMetricInference(MetricInference):
 
     def get_p_value(self, method: str) -> float:
         if method == RANDOMIZATION:
-            return self._get_p_value_randomization()
+            return self.get_p_value_randomization()
         elif method == BOOTSTRAP:
-            return self._get_p_value_bootstrap()
+            return self.get_p_value_bootstrap()
         elif method == ZTEST:
-            return self._get_p_value_z_test()
+            return self.get_p_value_z_test()
         else:
             raise NotImplementedError
 
-    def _get_p_value_z_test(self) -> float:
+    def get_p_value_z_test(self) -> float:
         return ZStatistic.get_p_value(self.treatment_effect, self.se_z_test)
 
     @property

@@ -16,18 +16,18 @@ class MetricInference(ABC):
     @property
     @abstractmethod
     def data(self) -> NDArray[np.float64]:
-        # metric and assignment status
+        # metric and assignment status for each unit (row)
         pass
 
     @property
     @abstractmethod
     def metric(self) -> NDArray[np.float64]:
-        # values for the metric
+        # values for the metric for each unit (row)
         pass
 
     @property
     def assignment(self) -> NDArray[np.float64]:
-        # assignment status
+        # assignment status for each unit (row)
         pass
 
     @classmethod
@@ -46,7 +46,7 @@ class MetricInference(ABC):
     def get_p_value(self, method: str) -> float:
         pass
 
-    def _get_p_value_randomization(self) -> float:
+    def get_p_value_randomization(self) -> float:
         logger.info(
             f"using number of randomizations {self.num_randomizations}"
         )
@@ -72,7 +72,7 @@ class MetricInference(ABC):
             self._se_bootstrap = se
         return self._se_bootstrap  # type: ignore
 
-    def _get_p_value_bootstrap(self) -> float:
+    def get_p_value_bootstrap(self) -> float:
         return ZStatistic.get_p_value(self.treatment_effect, self.se_bootstrap)
 
     @abstractmethod
