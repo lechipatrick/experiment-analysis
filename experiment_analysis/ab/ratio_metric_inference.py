@@ -81,11 +81,11 @@ class RatioMetricInference(MetricInference):
 
     def get_p_value(self, method: str) -> float:
         if method == RANDOMIZATION:
-            return self._get_p_value_randomization()
+            return self.get_p_value_randomization()
         elif method == BOOTSTRAP:
-            return self._get_p_value_bootstrap()
+            return self.get_p_value_bootstrap()
         elif method == DELTA:
-            return self._get_p_value_delta_method()
+            return self.get_p_value_delta_method()
         elif method == FIELLER:
             raise NotImplementedError
         else:
@@ -123,12 +123,12 @@ class RatioMetricInference(MetricInference):
 
         return self._se_delta_method  # type: ignore
 
-    def _get_p_value_delta_method(self) -> float:
+    def get_p_value_delta_method(self) -> float:
         return ZStatistic.get_p_value(
             self.treatment_effect, self.se_delta_method
         )
 
-    def _get_p_value_fieller_method(self) -> float:
+    def get_p_value_fieller_method(self) -> float:
         pass
 
     def get_confidence_interval(
