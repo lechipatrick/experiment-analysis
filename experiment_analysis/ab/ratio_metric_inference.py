@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 from numpy.typing import NDArray
 
-from experiment_analysis.ab.additive_metric import AdditiveMetricInference
+from experiment_analysis.ab.metric_inference import MetricInference
 from experiment_analysis.constants import (
     BOOTSTRAP,
     DELTA,
@@ -18,17 +18,27 @@ from experiment_analysis.data_models.ratio_metric_data import RatioMetricData
 from experiment_analysis.stats.zstatistic import ZStatistic
 
 
-class RatioMetricInference(AdditiveMetricInference):
+class RatioMetricInference(MetricInference):
     def __init__(
         self,
         data: RatioMetricData,
         num_bootstraps: int = 10000,
         num_randomizations: int = 10000,
     ) -> None:
-        super().__init__(data, num_bootstraps, num_randomizations)
+        self.metric_data: RatioMetricData = data
+        self.num_bootstraps = num_bootstraps
+        self.num_randomizations = num_randomizations
+
+        self._data = None
+        self._treatment_effect = None
+        self._metric = None
+        self._assignment = None
 
         self._se_delta_method = None
+        self._se_bootstrap = None
+
         self._ci_delta_method = None
+        self._ci_bootstrap = None
 
     @property
     def data(self) -> NDArray[np.float64]:

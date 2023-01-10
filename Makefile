@@ -50,5 +50,5 @@ lints.pylint:
 	poetry run pylint --rcfile pyproject.toml ${SOURCE_OBJECTS}
 
 test:
-	pytest tests/ -v --capture=tee-sys -n auto
+	pytest tests/ -v --capture=tee-sys
 
