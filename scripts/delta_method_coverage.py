@@ -77,4 +77,4 @@ simulate(num_units=num_units, control_mean=np.array([.001, mu]), cov=np.array([[
 se = np.sqrt(sigma2 / (num_units / 2))
 print(f"ratio is {1/ se}")
 # it looks like coverage can be too high.
-# this happens when
+# this happens when the ratio of mean to normalized se is too low (< 3)
