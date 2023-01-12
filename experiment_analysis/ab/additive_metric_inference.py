@@ -42,7 +42,7 @@ class AdditiveMetricInference:
         self._ci_z_test = None
         self._ci_bootstrap = None
 
-1    def set_num_randomizations(self, num_randomizations: int) -> None:
+    def set_num_randomizations(self, num_randomizations: int) -> None:
         self._num_randomizations = num_randomizations
 
     def set_num_bootstraps(self, num_bootstraps: int) -> None:
